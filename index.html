@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Desafío Enfermería Digital</title>
-<meta name="description" content="Juego por equipos de la Unidad 3 de TIC aplicada en Enfermería: dos rondas de preguntas y retos por estaciones.">
+<meta name="description" content="Juego por equipos de la Unidad 3 de TIC aplicada en Enfermería: preguntas y actividades en un solo tablero.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="estilos.css">
@@ -30,52 +30,12 @@
     <button type="button" id="resetNo">Cancelar</button>
   </div>
 
-  <nav class="modes" role="tablist" aria-label="Partes del juego">
-    <button type="button" role="tab" id="mtab-r1" aria-controls="mode-r1">Ronda 1</button>
-    <button type="button" role="tab" id="mtab-r2" aria-controls="mode-r2">Ronda 2 · Nivel avanzado</button>
-    <button type="button" role="tab" id="mtab-retos" aria-controls="mode-retos">Retos por estaciones</button>
-  </nav>
-
-  <section id="mode-r1" role="tabpanel" aria-labelledby="mtab-r1" class="mode">
-    <div class="board-scroll"><div class="board" id="board-r1"></div></div>
-    <div class="final"><button type="button" id="final-r1">Pregunta final</button></div>
-  </section>
-
-  <section id="mode-r2" role="tabpanel" aria-labelledby="mtab-r2" class="mode" hidden>
-    <div class="board-scroll"><div class="board" id="board-r2"></div></div>
-    <div class="final"><button type="button" id="final-r2">Pregunta final · Ronda 2</button></div>
-  </section>
-
-  <section id="mode-retos" role="tabpanel" aria-labelledby="mtab-retos" class="mode" hidden>
-    <div class="retos-top">
-      <div class="award-bar">
-        <label for="rTeam" class="lbl">Dar puntos a</label>
-        <select id="rTeam"></select>
-        <input id="rPts" type="number" step="10" value="100" aria-label="Puntos">
-        <button type="button" class="primary" id="rAdd">Sumar</button>
-        <span class="rmsg" id="rMsg" aria-live="polite"></span>
-      </div>
-      <div class="rclock-box">
-        <span class="rclock" id="rClock">05:00</span>
-        <div class="row" id="rPresets">
-          <button type="button" data-min="3">3 min</button>
-          <button type="button" data-min="5">5 min</button>
-          <button type="button" data-min="8">8 min</button>
-          <button type="button" data-min="10">10 min</button>
-        </div>
-        <div class="row">
-          <button type="button" class="primary" id="rStart">Iniciar</button>
-          <button type="button" id="rReset">Reiniciar</button>
-        </div>
-      </div>
-    </div>
-    <div class="subtabs" role="tablist" id="rtabs" aria-label="Estaciones"></div>
-    <div id="rpanels"></div>
-  </section>
+  <div class="board-scroll"><div class="board" id="board"></div></div>
+  <div class="final"><button type="button" id="finalBtn">Pregunta final</button></div>
 
   <section class="scores" id="scores" aria-label="Marcador"></section>
 
-  <p class="rules"><b>Cómo se juega.</b> <b>Ronda 1 y Ronda 2:</b> por turnos, cada equipo elige una categoría y un valor. Al abrir la pregunta corre el tiempo y el vocero responde. Si acierta, suma el valor; si falla, otro equipo puede «rebotar» y gana la mitad. La Ronda 2 es de nivel avanzado y su última columna son casos para debatir. <b>Retos:</b> los equipos rotan por estaciones (sopa de letras, crucigrama, detecta el error, NANDA-NIC y más); al revisar, la página sugiere un puntaje y usted lo suma con «Dar puntos». Todo se suma en el mismo marcador.</p>
+  <p class="rules"><b>Cómo se juega.</b> Por turnos, cada equipo elige una categoría y un valor. La casilla puede ser una pregunta o una actividad (sopa de letras, crucigrama, detecta el error, NANDA-NIC, ordenar pasos, ¿correcto o falta?, riesgo y medida, un caso o un dilema). Pulse <b>Iniciar tiempo</b>; al terminar, revise y asigne los puntos: valor completo si lo resolvieron bien, la mitad si fue un rebote o un resultado parcial. La pregunta final vale hasta 500 puntos para cada equipo.</p>
 </div>
 
 <div class="overlay" id="overlay" hidden>
@@ -95,8 +55,7 @@
 
 
 <script src="preguntas.js"></script>
-<script src="preguntas-avanzadas.js"></script>
+<script src="actividades.js"></script>
 <script src="juego.js"></script>
-<script src="retos.js"></script>
 </body>
 </html>
