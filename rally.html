@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Rally por estaciones para grupos de la Unidad 3 de TIC aplicada en Enfermería.">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px system-ui,sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Rally de Enfermería Digital</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: panel lateral fijo (grupos, puntos, cronómetro) + área de estaciones con pestañas; en teléfono se apila. */
+:root{
+  --bg:#EDF3F1; --surface:#FFFFFF; --ink:#0F2E2A; --muted:#52706B; --line:#C7D8D3;
+  --accent:#0B7A68; --accent-ink:#FFFFFF; --accent-soft:#D4EBE5;
+  --ok:#1D7438; --ok-soft:#DCF0E1; --bad:#BE3328; --bad-soft:#F8DDD9;
+  --found:#F3C552; --found-ink:#2B2104; --paper-rule:#DCE8F2;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0D1917; --surface:#142422; --ink:#E2EEEB; --muted:#8EABA5; --line:#2A423E;
+  --accent:#3CC3A6; --accent-ink:#06201B; --accent-soft:#183B35;
+  --ok:#62D08F; --ok-soft:#173424; --bad:#FF7E70; --bad-soft:#3B1D1A;
+  --found:#C9A033; --found-ink:#1B1403; --paper-rule:#1F3532; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0D1917; --surface:#142422; --ink:#E2EEEB; --muted:#8EABA5; --line:#2A423E;
+  --accent:#3CC3A6; --accent-ink:#06201B; --accent-soft:#183B35;
+  --ok:#62D08F; --ok-soft:#173424; --bad:#FF7E70; --bad-soft:#3B1D1A;
+  --found:#C9A033; --found-ink:#1B1403; --paper-rule:#1F3532; color-scheme:dark; }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(1.7rem,3.4vw,2.5rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.35rem;font-weight:800}
+h3{font-size:1.05rem;font-weight:600}
+p{margin:0}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.top{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+.eyebrow{font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
+.layout{display:grid;grid-template-columns:330px minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+aside{display:flex;flex-direction:column;gap:20px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+@media (max-width:900px){aside{position:static}}
+
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;font-weight:700}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.small{padding:4px 10px;font-size:.88rem}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.muted{color:var(--muted)}
+
+/* grupos */
+.stepper{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;width:max-content}
+.stepper button{border:0;background:var(--accent-soft);width:40px;height:40px;font-size:1.2rem;font-weight:700}
+.stepper input{width:56px;height:40px;border:0;text-align:center;font-family:var(--f-mono);font-weight:700;font-size:1.1rem;background:var(--surface)}
+.groups{display:flex;flex-direction:column;gap:8px;list-style:none;margin:0;padding:0}
+.group{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+.group.lead{border-color:var(--accent);background:var(--accent-soft)}
+.group input{border:0;background:transparent;font-weight:700;min-width:0;width:100%;padding:2px 0}
+.score{font-family:var(--f-mono);font-weight:700;font-size:1.2rem;min-width:2.5ch;text-align:right;font-variant-numeric:tabular-nums}
+.pts{display:flex;gap:4px}
+.pts button{border:1px solid var(--line);background:var(--surface);border-radius:6px;font-family:var(--f-mono);font-size:.8rem;padding:3px 6px}
+.pick{font-family:var(--f-display);font-weight:800;font-size:1.2rem;color:var(--accent);min-height:1.5em}
+
+/* cronómetro */
+.clock{font-family:var(--f-mono);font-size:2.6rem;font-weight:700;letter-spacing:.02em;font-variant-numeric:tabular-nums;line-height:1}
+.clock.done{color:var(--bad);animation:blink 1s steps(2) 4}
+@keyframes blink{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.clock.done{animation:none}}
+
+/* pestañas */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:700;white-space:nowrap}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tab .kind{font-family:var(--f-mono);font-size:.72rem;opacity:.7;margin-left:6px}
+.station{display:flex;flex-direction:column;gap:16px}
+.station-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:start}
+.station-head p{max-width:65ch}
+.badge{font-family:var(--f-mono);font-size:.8rem;border:1px solid var(--accent);color:var(--accent);border-radius:999px;padding:2px 10px;white-space:nowrap}
+.result{border-radius:8px;padding:10px 14px;font-weight:700}
+.result.good{background:var(--ok-soft);color:var(--ok)}
+.result.mid{background:var(--bad-soft);color:var(--bad)}
+
+/* plan */
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+td.r{font-family:var(--f-mono);font-weight:700}
+.chip{display:inline-block;border-radius:6px;padding:2px 8px;background:var(--accent-soft);font-weight:700;font-size:.88rem;margin:2px 4px 2px 0}
+ol.rules{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:4px;max-width:70ch}
+
+/* sopa */
+.ws{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:760px){.ws{grid-template-columns:minmax(0,1fr)}}
+.grid{display:grid;gap:2px;touch-action:none;user-select:none;-webkit-user-select:none;width:min(100%,560px);aspect-ratio:1;max-width:100%}
+.cell{display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-weight:700;font-size:clamp(.7rem,2.2vw,1.1rem);border-radius:4px;background:var(--bg);cursor:pointer}
+.cell.sel{background:var(--accent);color:var(--accent-ink)}
+.cell.found{background:var(--found);color:var(--found-ink)}
+.clues{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.clues li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:baseline;padding-bottom:8px;border-bottom:1px dashed var(--line)}
+.clues .n{font-family:var(--f-mono);color:var(--muted);font-size:.85rem}
+.clues .ans{font-family:var(--f-mono);font-size:.85rem;color:var(--muted);letter-spacing:.08em}
+.clues li.ok .ans{color:var(--ok);font-weight:700}
+.clues li.ok{opacity:.75}
+
+/* nota de enfermería */
+.note{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--accent);border-radius:8px;padding:18px 20px;
+  background-image:repeating-linear-gradient(to bottom,transparent 0 35px,var(--paper-rule) 35px 36px);line-height:36px;font-size:1.05rem}
+.note-meta{font-family:var(--f-mono);font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:6px}
+.seg{border:0;background:transparent;padding:2px 3px;border-radius:4px;text-align:left;line-height:1.6;display:inline;font-size:inherit}
+.seg:hover{background:var(--accent-soft)}
+.seg.marked{background:var(--bad-soft);text-decoration:underline wavy var(--bad);text-underline-offset:4px}
+.seg.hit{background:var(--ok-soft);text-decoration:underline wavy var(--ok)}
+.seg.miss{outline:2px dashed var(--bad);outline-offset:1px}
+.seg.wrong{background:var(--bad-soft);text-decoration:line-through}
+.why{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+
+/* ordenar */
+.seg-toggle{display:flex;flex-wrap:wrap;gap:6px}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.step{display:grid;grid-template-columns:2.2em minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface)}
+.step .pos{font-family:var(--f-mono);font-weight:700;color:var(--muted)}
+.step.ok{border-color:var(--ok);background:var(--ok-soft)}
+.step.no{border-color:var(--bad);background:var(--bad-soft)}
+.step .mv{display:flex;gap:4px}
+.step .mv button{width:36px;height:36px;border:1px solid var(--line);border-radius:6px;background:var(--surface);font-weight:700}
+
+/* correcto o falta */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.card{border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.card .q{font-weight:700}
+.card .opts{display:flex;gap:6px;margin-top:auto}
+.card .opts button{flex:1;border:1px solid var(--line);border-radius:6px;padding:6px;background:var(--bg);font-weight:700}
+.card.good{border-color:var(--ok)}
+.card.bad{border-color:var(--bad)}
+.card .exp{font-size:.92rem}
+.card.good .verdict{color:var(--ok);font-weight:700}
+.card.bad .verdict{color:var(--bad);font-weight:700}
+
+/* emparejar */
+.match{display:flex;flex-direction:column;gap:10px}
+.mrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px}
+@media (max-width:620px){.mrow{grid-template-columns:minmax(0,1fr)}}
+.mrow select{width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
+.mrow.ok{border-color:var(--ok);background:var(--ok-soft)}
+.mrow.no{border-color:var(--bad);background:var(--bad-soft)}
+
+/* dilema */
+.dilemma{border:2px solid var(--ink);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.dilemma ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
+.dilemma .who{font-family:var(--f-mono);font-size:.85rem;color:var(--muted)}
+/* selección de estaciones */
+.toggles{display:flex;flex-wrap:wrap;gap:6px}
+.toggles label{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-weight:700;font-size:.9rem;cursor:pointer}
+.toggles input{accent-color:var(--accent)}
+
+/* crucigrama */
+.cwgrid{display:grid;gap:2px;max-width:100%}
+.cwcell{position:relative;aspect-ratio:1;background:var(--surface);border:1.5px solid var(--ink);border-radius:3px}
+.cwcell input{width:100%;height:100%;border:0;background:transparent;text-align:center;font-family:var(--f-mono);font-weight:700;font-size:clamp(.75rem,2.4vw,1.2rem);text-transform:uppercase;padding:0;border-radius:2px}
+.cwcell input:focus{outline:3px solid var(--accent);outline-offset:-3px}
+.cwcell .num{position:absolute;top:2px;left:3px;font-size:.6rem;font-family:var(--f-mono);color:var(--muted);pointer-events:none;line-height:1}
+.cwblank{aspect-ratio:1}
+.cwcell.act{background:var(--accent-soft)}
+.cwcell.ok{background:var(--ok-soft)}
+.cwcell.bad{background:var(--bad-soft)}
+.clues li{cursor:pointer}
+.clues li.act{background:var(--accent-soft);border-radius:6px}
+
+/* NANDA-NIC */
+.nrow{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px}
+@media (max-width:760px){.nrow{grid-template-columns:minmax(0,1fr)}}
+.nrow select{width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
+.nrow select.ok{border-color:var(--ok);background:var(--ok-soft)}
+.nrow select.no{border-color:var(--bad);background:var(--bad-soft)}
+.nhead{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:10px;padding:0 12px;font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+@media (max-width:760px){.nhead{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Unidad 3 · Tema 3 Redes sociales y teleenfermería · Tema 4 Registros sanitarios electrónicos</div>
+      <h1>Rally de Enfermería Digital</h1>
+    </div>
+    <p class="muted" style="max-width:46ch">Seis estaciones para grupos de enfermeros graduados. Elija cuántos grupos tiene y la página reparte las estaciones por rondas.</p>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <section class="panel" aria-labelledby="g-title">
+        <h2 id="g-title">Grupos</h2>
+        <div class="row">
+          <label for="gcount" class="muted">Cantidad de grupos</label>
+          <div class="stepper">
+            <button type="button" id="gminus" aria-label="Quitar un grupo">−</button>
+            <input id="gcount" type="number" min="1" max="12" value="4" inputmode="numeric">
+            <button type="button" id="gplus" aria-label="Agregar un grupo">+</button>
+          </div>
+        </div>
+        <ul class="groups" id="groups"></ul>
+        <div class="row">
+          <button class="btn small" id="pickGroup" type="button">Sortear un grupo</button>
+          <button class="btn small" id="resetScores" type="button">Poner puntos en cero</button>
+        </div>
+        <div class="pick" id="pickOut" aria-live="polite"></div>
+        <p class="muted" id="resetConfirm" hidden>
+          ¿Borrar todos los puntos?
+          <button class="btn small" id="resetYes" type="button">Sí, borrar</button>
+          <button class="btn small" id="resetNo" type="button">Cancelar</button>
+        </p>
+      </section>
+
+      <section class="panel" aria-labelledby="t-title">
+        <h2 id="t-title">Cronómetro</h2>
+        <div class="clock" id="clock" aria-live="off">05:00</div>
+        <div class="row" id="presets">
+          <button class="btn small" data-min="3" type="button">3 min</button>
+          <button class="btn small" data-min="5" type="button">5 min</button>
+          <button class="btn small" data-min="8" type="button">8 min</button>
+          <button class="btn small" data-min="10" type="button">10 min</button>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="tStart" type="button">Iniciar</button>
+          <button class="btn" id="tReset" type="button">Reiniciar</button>
+        </div>
+      </section>
+    </aside>
+
+    <main class="panel" style="padding:18px 20px">
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <div id="stations"></div>
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s);
+const el=(tag,attrs={},...kids)=>{const e=document.createElement(tag);for(const k in attrs){if(k==="class")e.className=attrs[k];else if(k==="text")e.textContent=attrs[k];else if(k.startsWith("on"))e.addEventListener(k.slice(2),attrs[k]);else e.setAttribute(k,attrs[k]);}kids.flat().forEach(c=>e.append(c));return e;};
+const shuffle=(a,r=Math.random)=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+
+/* ---------- GRUPOS ---------- */
+let G=store.get("rally-groups",{n:4,names:[],scores:[]});
+function norm(){G.n=Math.max(1,Math.min(12,parseInt(G.n)||1));for(let i=0;i<G.n;i++){if(!G.names[i])G.names[i]="Grupo "+(i+1);if(typeof G.scores[i]!=="number")G.scores[i]=0;}}
+function save(){store.set("rally-groups",G);}
+function renderGroups(){
+  norm();$("#gcount").value=G.n;
+  const ul=$("#groups");ul.innerHTML="";
+  const max=Math.max(...G.scores.slice(0,G.n));
+  for(let i=0;i<G.n;i++){
+    const name=el("input",{id:"gname"+i,"aria-label":"Nombre del grupo "+(i+1),value:G.names[i]});
+    name.addEventListener("input",()=>{G.names[i]=name.value||("Grupo "+(i+1));save();renderPlan();});
+    const sc=el("span",{class:"score",text:G.scores[i]});
+    const pts=el("div",{class:"pts"},
+      ...[-1,1,5,10].map(v=>el("button",{type:"button","aria-label":(v>0?"Sumar ":"Restar ")+Math.abs(v)+" a "+G.names[i],text:(v>0?"+":"−")+Math.abs(v),onclick:()=>{G.scores[i]=G.scores[i]+v;save();renderGroups();}})));
+    ul.append(el("li",{class:"group"+(max>0&&G.scores[i]===max?" lead":"")},name,sc,pts));
+  }
+}
+function setCount(n){G.n=n;norm();save();renderGroups();renderPlan();}
+$("#gminus").onclick=()=>setCount(G.n-1);
+$("#gplus").onclick=()=>setCount(G.n+1);
+$("#gcount").addEventListener("change",e=>setCount(e.target.value));
+$("#pickGroup").onclick=()=>{const i=Math.floor(Math.random()*G.n);$("#pickOut").textContent="Le toca a: "+G.names[i];};
+$("#resetScores").onclick=()=>{$("#resetConfirm").hidden=false;};
+$("#resetNo").onclick=()=>{$("#resetConfirm").hidden=true;};
+$("#resetYes").onclick=()=>{G.scores=G.scores.map(()=>0);save();renderGroups();$("#resetConfirm").hidden=true;};
+
+/* ---------- CRONÓMETRO ---------- */
+let total=300,left=300,timer=null,actx=null;
+const fmt=s=>String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+function drawClock(){const c=$("#clock");c.textContent=fmt(left);c.classList.toggle("done",left===0);}
+function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(t=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(.2,actx.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+t+.3);o.start(actx.currentTime+t);o.stop(actx.currentTime+t+.3);});}catch(e){}}
+function stop(){clearInterval(timer);timer=null;$("#tStart").textContent="Iniciar";}
+$("#tStart").onclick=()=>{
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  if(timer){stop();return;}
+  if(left===0)left=total;
+  $("#tStart").textContent="Pausar";
+  timer=setInterval(()=>{left=Math.max(0,left-1);drawClock();if(left===0){stop();beep();}},1000);
+};
+$("#tReset").onclick=()=>{stop();left=total;drawClock();};
+$("#presets").addEventListener("click",e=>{const m=e.target.dataset.min;if(!m)return;stop();total=left=m*60;drawClock();});
+
+/* ---------- ESTACIONES ---------- */
+const STATIONS=[
+  {id:"plan",name:"Plan de rondas",kind:"guía"},
+  {id:"sopa",name:"Sopa de letras",kind:"juego",pts:"1 pt por palabra",rot:true},
+  {id:"cruci",name:"Crucigrama",kind:"juego",pts:"1 pt por palabra",rot:true},
+  {id:"error",name:"Detecta el error",kind:"registro",pts:"2 pts por error, −1 por marca falsa",rot:true},
+  {id:"nanda",name:"Diagnóstico e intervención",kind:"NANDA-NIC",pts:"1 pt por acierto",rot:true},
+  {id:"orden",name:"Ordena los pasos",kind:"protocolo",pts:"5 pts si todo está en orden",rot:true},
+  {id:"juicio",name:"¿Correcto o falta?",kind:"ética",pts:"1 pt por acierto",rot:true},
+  {id:"empareja",name:"Riesgo y medida",kind:"seguridad",pts:"1 pt por par",rot:true},
+  {id:"dilema",name:"Dilema final",kind:"debate",pts:"hasta 10 pts"}
+];
+function activeRot(){const on=store.get("rally-on",null);const all=STATIONS.filter(s=>s.rot);const act=on?all.filter(s=>on.includes(s.id)):all;return act.length?act:all;}
+const tabs=$("#tabs"),host=$("#stations");
+let current=store.get("rally-tab","plan");
+STATIONS.forEach(s=>{
+  tabs.append(el("button",{class:"tab",role:"tab",id:"tab-"+s.id,"aria-controls":"st-"+s.id,type:"button",onclick:()=>show(s.id)},s.name,el("span",{class:"kind",text:s.kind})));
+  host.append(el("section",{class:"station",id:"st-"+s.id,role:"tabpanel","aria-labelledby":"tab-"+s.id}));
+});
+function show(id){current=id;store.set("rally-tab",id);STATIONS.forEach(s=>{$("#tab-"+s.id).setAttribute("aria-selected",s.id===id);$("#st-"+s.id).hidden=s.id!==id;});}
+function head(s,desc,...extra){return el("div",{class:"station-head"},el("div",{style:"display:flex;flex-direction:column;gap:6px"},el("h2",{text:s.name}),el("p",{class:"muted",text:desc})),el("div",{class:"row"},s.pts?el("span",{class:"badge",text:s.pts}):"",...extra));}
+const S=id=>STATIONS.find(s=>s.id===id);
+
+/* PLAN */
+function renderPlan(){
+  const box=$("#st-plan");box.innerHTML="";
+  const ROT=activeRot();
+  box.append(head(S("plan"),"Cada grupo pasa por las "+ROT.length+" estaciones elegidas, una por ronda. Si hay más grupos que estaciones, dos grupos comparten estación y compiten en paralelo. Al final todos participan en el dilema."));
+  const tg=el("div",{class:"toggles"});
+  STATIONS.filter(s=>s.rot).forEach(s=>{const cb=el("input",{type:"checkbox",id:"on-"+s.id});cb.checked=ROT.includes(s);
+    cb.addEventListener("change",()=>{const ids=[...tg.querySelectorAll("input:checked")].map(x=>x.id.slice(3));if(!ids.length){cb.checked=true;return;}store.set("rally-on",ids);renderPlan();});
+    tg.append(el("label",{for:"on-"+s.id},cb,s.name));});
+  box.append(el("div",{style:"display:flex;flex-direction:column;gap:8px"},el("h3",{text:"Estaciones que entran en el rally"}),el("p",{class:"muted",text:"Desmarque las que no quiera usar: menos estaciones, menos rondas."}),tg));
+  const rows=ROT.map((_,r)=>{
+    const by=ROT.map(()=>[]);
+    for(let g=0;g<G.n;g++)by[(g+r)%ROT.length].push(G.names[g]);
+    return el("tr",{},el("td",{class:"r",text:"Ronda "+(r+1)}),...by.map(list=>el("td",{},...(list.length?list.map(n=>el("span",{class:"chip",text:n})):[el("span",{class:"muted",text:"—"})]))));
+  });
+  box.append(el("div",{class:"table-wrap"},el("table",{},el("thead",{},el("tr",{},el("th",{text:"Ronda"}),...ROT.map(s=>el("th",{text:s.name})))),el("tbody",{},...rows))));
+  box.append(el("h3",{text:"Cómo jugar"}));
+  box.append(el("ol",{class:"rules"},
+    el("li",{text:"Ajuste la cantidad de grupos en el panel. Puede cambiar los nombres tocándolos."}),
+    el("li",{text:"Use el cronómetro: 5 a 8 minutos por ronda funciona bien."}),
+    el("li",{text:"Al terminar cada ronda, revise con el botón de la estación y sume los puntos con los botones +1, +5 y +10 del grupo."}),
+    el("li",{text:"El dilema final se hace en plenaria: sortee un grupo para que exponga y otro para que lo rebata."}),
+    el("li",{text:"Si proyecta la página, cada estación se puede reiniciar para el grupo siguiente."})
+  ));
+}
+
+/* SOPA DE LETRAS */
+const WORDS=[
+  ["TELEENFERMERIA","Cuidado enfermero brindado a distancia con apoyo de las TIC."],
+  ["TELEMONITOREO","Seguimiento remoto de glucemia, peso o presión con dispositivos conectados."],
+  ["CONSENTIMIENTO","Se obtiene antes de publicar la imagen de un paciente y puede revocarse en cualquier momento."],
+  ["AUTENTICACION","Verifica que quien entra al RSE es realmente quien dice ser."],
+  ["INTEROPERABLE","Así debe ser un RSE para que la alergia registrada en el centro de salud aparezca en el hospital."],
+  ["BRECHADIGITAL","Desigualdad en acceso a internet y dispositivos (dos palabras, juntas)."],
+  ["TRAZABILIDAD","Permite reconstruir quién hizo qué, cuándo y por qué durante el cuidado."],
+  ["CONFIDENCIAL","Información que solo conocen quienes participan en la atención del paciente."],
+  ["AUDITORIA","Revela que 19 personas sin relación asistencial abrieron la historia de un paciente."],
+  ["PRIVACIDAD","Derecho del paciente a decidir quién conoce sus datos de salud."],
+  ["ENMIENDA","Forma correcta de corregir una dosis mal registrada sin borrar el original."],
+  ["CIFRADO","Vuelve ilegibles los datos de una laptop perdida para quien no tiene la clave."]
+];
+const SIZE=15;
+let ws=null,showWords=false;
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function buildWS(seed){
+  const dirs=[[0,1],[1,0],[1,1],[-1,1],[0,-1],[-1,0],[-1,-1],[1,-1]];
+  for(let attempt=0;attempt<50;attempt++){
+    const r=mulberry(seed+attempt*7919),grid=Array(SIZE*SIZE).fill(""),place=[];let ok=true;
+    for(const [w] of [...WORDS].sort((a,b)=>b[0].length-a[0].length)){
+      let done=false;
+      for(let t=0;t<400&&!done;t++){
+        const [dr,dc]=dirs[Math.floor(r()*dirs.length)],r0=Math.floor(r()*SIZE),c0=Math.floor(r()*SIZE);
+        const r1=r0+dr*(w.length-1),c1=c0+dc*(w.length-1);
+        if(r1<0||r1>=SIZE||c1<0||c1>=SIZE)continue;
+        const cells=[];let fits=true;
+        for(let k=0;k<w.length;k++){const i=(r0+dr*k)*SIZE+(c0+dc*k);if(grid[i]&&grid[i]!==w[k]){fits=false;break;}cells.push(i);}
+        if(!fits)continue;
+        cells.forEach((i,k)=>grid[i]=w[k]);place.push({w,cells});done=true;
+      }
+      if(!done){ok=false;break;}
+    }
+    if(!ok)continue;
+    const L="AEIOUSRNTLCDMPBGVQHFJ";
+    for(let i=0;i<grid.length;i++)if(!grid[i])grid[i]=L[Math.floor(r()*L.length)];
+    return {grid,place,found:new Set()};
+  }
+}
+function renderSopa(seed){
+  ws=buildWS(seed);const box=$("#st-sopa");box.innerHTML="";
+  const toggle=el("button",{class:"btn small",type:"button",text:showWords?"Ocultar palabras":"Mostrar palabras"});
+  toggle.onclick=()=>{showWords=!showWords;toggle.textContent=showWords?"Ocultar palabras":"Mostrar palabras";drawClues();};
+  box.append(head(S("sopa"),"Las palabras no están en una lista: hay que deducirlas de cada pista. Pueden estar en horizontal, vertical, diagonal y al revés. Arrastre sobre las letras para marcarlas.",toggle,el("button",{class:"btn small",type:"button",text:"Nueva sopa",onclick:()=>renderSopa(Date.now()%100000)})));
+  const grid=el("div",{class:"grid",style:`grid-template-columns:repeat(${SIZE},1fr)`,role:"grid","aria-label":"Sopa de letras"});
+  ws.grid.forEach((ch,i)=>grid.append(el("div",{class:"cell","data-i":i,text:ch})));
+  const status=el("div",{class:"result good",id:"wsStatus",hidden:""});
+  const clues=el("ol",{class:"clues",id:"clues"});
+  box.append(el("div",{class:"ws"},grid,el("div",{style:"display:flex;flex-direction:column;gap:12px;min-width:0"},status,clues)));
+  let start=null,line=[];
+  const cellAt=e=>{const t=document.elementFromPoint(e.clientX,e.clientY);return t&&t.classList.contains("cell")?+t.dataset.i:null;};
+  const paint=()=>grid.querySelectorAll(".cell").forEach(c=>c.classList.toggle("sel",line.includes(+c.dataset.i)));
+  grid.addEventListener("pointerdown",e=>{const i=cellAt(e);if(i===null)return;start=i;line=[i];paint();grid.setPointerCapture(e.pointerId);e.preventDefault();});
+  grid.addEventListener("pointermove",e=>{if(start===null)return;const i=cellAt(e);if(i===null)return;
+    const r0=Math.floor(start/SIZE),c0=start%SIZE,r1=Math.floor(i/SIZE),c1=i%SIZE,dr=r1-r0,dc=c1-c0;
+    if(dr!==0&&dc!==0&&Math.abs(dr)!==Math.abs(dc))return;
+    const n=Math.max(Math.abs(dr),Math.abs(dc)),sr=Math.sign(dr),sc=Math.sign(dc);line=[];
+    for(let k=0;k<=n;k++)line.push((r0+sr*k)*SIZE+(c0+sc*k));paint();});
+  const end=()=>{if(start===null)return;
+    const key=line.join(","),rev=line.slice().reverse().join(",");
+    const hit=ws.place.find(p=>!ws.found.has(p.w)&&(p.cells.join(",")===key||p.cells.join(",")===rev));
+    if(hit){ws.found.add(hit.w);hit.cells.forEach(i=>grid.children[i].classList.add("found"));drawClues();}
+    start=null;line=[];paint();};
+  grid.addEventListener("pointerup",end);grid.addEventListener("pointercancel",end);
+  drawClues();
+}
+function drawClues(){
+  const ol=$("#clues");if(!ol)return;ol.innerHTML="";
+  WORDS.forEach(([w,clue],k)=>{
+    const got=ws.found.has(w);
+    const ans=got||showWords?w:"_ ".repeat(w.length).trim()+"  ("+w.length+")";
+    ol.append(el("li",{class:got?"ok":""},el("span",{class:"n",text:String(k+1).padStart(2,"0")}),el("div",{},el("div",{text:clue}),el("div",{class:"ans",text:ans}))));
+  });
+  const st=$("#wsStatus");st.hidden=ws.found.size===0;
+  st.textContent=ws.found.size===WORDS.length?"¡Completa! "+WORDS.length+" de "+WORDS.length+" palabras.":"Encontradas: "+ws.found.size+" de "+WORDS.length;
+}
+
+/* DETECTA EL ERROR */
+const NOTE=[
+  {t:"Paciente masculino de 68 años, con diagnóstico de neumonía adquirida en la comunidad; antecedentes de HTA y DM2.",e:false},
+  {t:"Paciente se ve bien y tranquilo.",e:true,why:"Es una apreciación subjetiva: no describe hallazgos observables ni medibles (conciencia, patrón respiratorio, coloración)."},
+  {t:"14:00 · T° 38,5 °C, FC 98 lpm, FR 24 rpm, PA 138/84 mmHg, SatO₂ 92 % con O₂ por cánula nasal a 2 L/min.",e:false},
+  {t:"Se deja registrada la ceftriaxona 1 g IV de las 16:00 para adelantar trabajo.",e:true,why:"Nunca se registra una intervención antes de realizarla. Si no se administra, el registro es falso y pone en riesgo al paciente."},
+  {t:"Refiere dolor torácico 3/10 (EVA), punzante, en hemitórax derecho, que aumenta con la tos.",e:false},
+  {t:"Se informa al médico.",e:true,why:"Falta a quién, a qué hora, qué se informó y qué indicó. Sin esos datos no hay trazabilidad."},
+  {t:"Paracetamol: se borra «2 g» y se reemplaza por «1 g».",e:true,why:"No se borra un registro. Se hace una enmienda que conserve el original, con fecha, hora, motivo y firma."},
+  {t:"El hijo solicita información; se consulta al paciente, consciente y orientado, que autoriza informar solo su estado general.",e:false},
+  {t:"Pte c/ NAC, s/p ATB, BIC OK.",e:true,why:"Abreviaturas no estandarizadas y ambiguas (por ejemplo, «s/p» puede leerse como «sin pauta» o «status post»). Generan errores de interpretación."},
+  {t:"Registrado con el usuario de la Lcda. Torres porque mi sesión estaba bloqueada.",e:true,why:"Cada registro debe hacerse con credenciales propias. Usar las de otra persona anula la autoría y la responsabilidad legal."},
+  {t:"Se eleva la cabecera a 45°, se enseña tos asistida; el paciente realiza la técnica correctamente.",e:false}
+];
+function renderError(){
+  const box=$("#st-error");box.innerHTML="";
+  const errN=NOTE.filter(n=>n.e).length;
+  const out=el("div",{}),why=el("div",{});
+  box.append(head(S("error"),"Esta nota de enfermería de Juan Pérez tiene "+errN+" errores de registro. Toque cada frase incorrecta para marcarla y luego revise.",
+    el("button",{class:"btn small primary",type:"button",text:"Revisar",onclick:check}),
+    el("button",{class:"btn small",type:"button",text:"Reiniciar",onclick:renderError})));
+  const note=el("div",{class:"note"},el("div",{class:"note-meta",text:"NOTA DE ENFERMERÍA · Medicina Interna · Cama 12 · Turno vespertino"}));
+  NOTE.forEach((n,i)=>{const b=el("button",{class:"seg",type:"button","data-i":i,"aria-pressed":"false",text:n.t});b.onclick=()=>{if(b.dataset.locked)return;b.classList.toggle("marked");b.setAttribute("aria-pressed",b.classList.contains("marked"));};note.append(b," ");});
+  box.append(note,out,why);
+  function check(){
+    let hit=0,fp=0;
+    note.querySelectorAll(".seg").forEach(b=>{const n=NOTE[+b.dataset.i],m=b.classList.contains("marked");b.dataset.locked="1";b.classList.remove("marked");
+      if(n.e&&m){b.classList.add("hit");hit++;}else if(n.e){b.classList.add("miss");}else if(m){b.classList.add("wrong");fp++;}});
+    out.innerHTML="";out.append(el("div",{class:"result "+(hit===errN&&fp===0?"good":"mid"),text:`Errores encontrados: ${hit} de ${errN} · Marcas incorrectas: ${fp} · Puntaje sugerido: ${Math.max(0,hit*2-fp)}`}));
+    why.innerHTML="";why.append(el("h3",{text:"Por qué son errores"}),el("ul",{class:"why"},...NOTE.filter(n=>n.e).map(n=>el("li",{},el("strong",{text:"«"+n.t+"» "}),n.why))));
+  }
+}
+
+/* ORDENA LOS PASOS */
+const SEQS={
+  dosis:{label:"Corregir una dosis mal registrada en el RSE",steps:[
+    "Detectar la discrepancia y verificar la dosis realmente administrada (orden médica, hoja de medicación, bomba).",
+    "Valorar al paciente para descartar efectos por el error.",
+    "Agregar una enmienda sin borrar ni sobrescribir el registro original.",
+    "Indicar fecha, hora, motivo de la corrección y firmar con el usuario propio.",
+    "Informar al médico o a la jefatura y notificar el evento según el protocolo de seguridad del paciente."]},
+  tele:{label:"Alerta de telemonitoreo: paciente con insuficiencia cardíaca sube 2 kg en 48 h",steps:[
+    "Verificar que el dato sea fiable: dispositivo, hora y condiciones de la medición.",
+    "Contactar al paciente y valorar signos de alarma (disnea, ortopnea, edema, diuresis).",
+    "Aplicar el protocolo de escalamiento y comunicar el caso al médico tratante.",
+    "Ejecutar la conducta indicada: valoración presencial o ajuste del tratamiento.",
+    "Documentar en el RSE la alerta, la valoración, la comunicación y la conducta.",
+    "Programar el seguimiento y reforzar la educación sobre autocontrol del peso."]},
+  red:{label:"Una publicación tuya con un paciente se vuelve viral y él pide retirarla",steps:[
+    "Retirar la publicación de inmediato: el consentimiento es revocable.",
+    "Conversar con el paciente, ofrecer disculpas y escuchar su preocupación.",
+    "Informar a la jefatura o al comité de ética de la institución.",
+    "Solicitar a la plataforma la eliminación de copias o capturas difundidas.",
+    "Documentar lo actuado y revisar la política institucional de uso de redes."]}
+};
+let seqKey="dosis",seqOrder=[];
+function renderOrden(reshuffle=true){
+  const box=$("#st-orden");box.innerHTML="";
+  const seq=SEQS[seqKey];
+  if(reshuffle){do{seqOrder=shuffle(seq.steps.map((_,i)=>i));}while(seqOrder.every((v,i)=>v===i));}
+  const out=el("div",{});
+  box.append(head(S("orden"),"Elija un escenario. Los pasos están desordenados: muévalos con las flechas hasta dejar la secuencia correcta.",
+    el("button",{class:"btn small primary",type:"button",text:"Revisar",onclick:()=>check()}),
+    el("button",{class:"btn small",type:"button",text:"Mezclar otra vez",onclick:()=>renderOrden(true)})));
+  box.append(el("div",{class:"seg-toggle"},...Object.entries(SEQS).map(([k,s])=>el("button",{class:"btn small"+(k===seqKey?" primary":""),type:"button",text:s.label,onclick:()=>{seqKey=k;renderOrden(true);}}))));
+  const ul=el("ol",{class:"steps"});
+  seqOrder.forEach((si,pos)=>{
+    const up=el("button",{type:"button","aria-label":"Subir",text:"↑",onclick:()=>{if(pos>0){[seqOrder[pos-1],seqOrder[pos]]=[seqOrder[pos],seqOrder[pos-1]];renderOrden(false);}}});
+    const dn=el("button",{type:"button","aria-label":"Bajar",text:"↓",onclick:()=>{if(pos<seqOrder.length-1){[seqOrder[pos+1],seqOrder[pos]]=[seqOrder[pos],seqOrder[pos+1]];renderOrden(false);}}});
+    ul.append(el("li",{class:"step"},el("span",{class:"pos",text:pos+1}),el("span",{text:seq.steps[si]}),el("span",{class:"mv"},up,dn)));
+  });
+  box.append(ul,out);
+  function check(){let ok=0;[...ul.children].forEach((li,pos)=>{const good=seqOrder[pos]===pos;li.classList.toggle("ok",good);li.classList.toggle("no",!good);if(good)ok++;});
+    out.innerHTML="";out.append(el("div",{class:"result "+(ok===seqOrder.length?"good":"mid"),text:ok===seqOrder.length?"Secuencia correcta. 5 puntos.":ok+" de "+seqOrder.length+" pasos en su lugar. Discutan por qué y vuelvan a intentar."}));}
+}
+
+/* CORRECTO O FALTA */
+const JUDGE=[
+  ["Abrir con tu usuario la historia de un vecino hospitalizado en otro servicio para saber cómo sigue.",false,"Tener credenciales no autoriza el acceso: falta la relación asistencial. Además queda registrado en la auditoría."],
+  ["Acceder a la historia restringida de un paciente inconsciente en Emergencias, registrando en el sistema el motivo del acceso.",true,"Es un acceso de emergencia justificado por beneficencia, con trazabilidad. El paciente debe ser informado después."],
+  ["Enviar al WhatsApp del servicio la foto de una herida donde se ve la pulsera con el nombre del paciente.",false,"Expone datos identificativos en un canal no institucional y sin control de acceso."],
+  ["Publicar en tu perfil profesional una infografía sobre pie diabético citando guías del MSP.",true,"Es educación sanitaria basada en evidencia y sin datos de pacientes."],
+  ["Informar el diagnóstico al hijo de un paciente consciente y orientado sin consultarle a él.",false,"La información pertenece al paciente capaz. Se requiere su autorización."],
+  ["Cerrar la sesión abierta de un colega y registrar el signo vital con tu propio usuario.",true,"Mantiene la autoría del registro y evita que otro responda por tu intervención."],
+  ["Publicar: «Turno durísimo, perdimos al paciente de 34 años del accidente de la Perimetral».",false,"No hay nombre, pero la edad, el evento y el lugar permiten identificarlo de forma indirecta."],
+  ["Hacer una videoconsulta desde una cafetería con el altavoz del teléfono.",false,"Terceros pueden escuchar información clínica. La privacidad del entorno también es responsabilidad del profesional."],
+  ["Seguir la clasificación «riesgo bajo» de la IA aunque observas palidez, diaforesis y respuestas lentas.",false,"Es sesgo de automatización. El juicio clínico prevalece: hay que escalar y documentar la discrepancia."],
+  ["Ofrecer seguimiento por llamada telefónica a los pacientes diabéticos que no tienen internet.",true,"Un modelo híbrido reduce la brecha digital sin excluir a los pacientes vulnerables."],
+  ["Copiar la valoración del turno anterior en el RSE porque «el paciente sigue igual».",false,"El copiar y pegar perpetúa datos que ya no son ciertos y oculta cambios clínicos. Cada valoración debe ser actual."],
+  ["Corregir un dato erróneo agregando una enmienda con fecha, hora, motivo y firma.",true,"Conserva la integridad y la trazabilidad del registro."]
+];
+function renderJuicio(){
+  const box=$("#st-juicio");box.innerHTML="";
+  let score=0,answered=0;const status=el("div",{class:"result good",hidden:""});
+  box.append(head(S("juicio"),"Para cada situación, el grupo decide si la actuación es correcta o constituye una falta ética o legal. Justifiquen antes de tocar.",
+    el("button",{class:"btn small",type:"button",text:"Reiniciar",onclick:renderJuicio})),status);
+  const grid=el("div",{class:"cards"});
+  shuffle(JUDGE).forEach(([q,right,exp])=>{
+    const verdict=el("div",{class:"verdict"}),ex=el("p",{class:"exp",hidden:""},exp);
+    const opts=el("div",{class:"opts"});
+    const card=el("div",{class:"card"},el("p",{class:"q",text:q}),verdict,ex,opts);
+    [["Correcto",true],["Falta",false]].forEach(([lab,val])=>opts.append(el("button",{type:"button",text:lab,onclick:()=>{
+      if(card.dataset.done)return;card.dataset.done="1";answered++;const ok=val===right;if(ok)score++;
+      card.classList.add(ok?"good":"bad");verdict.textContent=(ok?"Acierto. ":"No. ")+"Es "+(right?"correcto":"una falta")+".";ex.hidden=false;opts.hidden=true;
+      status.hidden=false;status.textContent="Aciertos: "+score+" de "+answered+" (total "+JUDGE.length+")";}})));
+    grid.append(card);
+  });
+  box.append(grid);
+}
+
+/* RIESGO Y MEDIDA */
+const PAIRS=[
+  ["Alguien ingresa al RSE con una contraseña robada.","Autenticación de doble factor"],
+  ["Se pierde una laptop con historias clínicas descargadas.","Cifrado de datos"],
+  ["Personal ajeno al caso abre la historia de una figura pública.","Auditoría de accesos"],
+  ["Un estudiante en rotación puede ver diagnósticos psiquiátricos que no necesita.","Control de accesos por rol"],
+  ["La alergia registrada en el centro de salud no aparece en el hospital.","Interoperabilidad de historias clínicas"],
+  ["El paciente pide retirar la foto suya que se publicó con su permiso.","Revocación del consentimiento informado"],
+  ["La sesión queda abierta en la estación de enfermería durante horas.","Cierre automático de sesión por inactividad"]
+];
+function renderEmpareja(){
+  const box=$("#st-empareja");box.innerHTML="";const out=el("div",{});
+  const opts=shuffle(PAIRS.map(p=>p[1]));
+  box.append(head(S("empareja"),"Relacione cada situación de riesgo con la medida que la previene o la resuelve mejor. Cada medida se usa una sola vez.",
+    el("button",{class:"btn small primary",type:"button",text:"Revisar",onclick:check}),
+    el("button",{class:"btn small",type:"button",text:"Reiniciar",onclick:renderEmpareja})));
+  const list=el("div",{class:"match"});
+  shuffle(PAIRS.map((p,i)=>i)).forEach((i,k)=>{
+    const sel=el("select",{id:"m"+k,"data-i":i,"aria-label":"Medida para: "+PAIRS[i][0]},el("option",{value:"",text:"Elija la medida…"}),...opts.map(o=>el("option",{value:o,text:o})));
+    list.append(el("div",{class:"mrow"},el("span",{text:PAIRS[i][0]}),sel));
+  });
+  box.append(list,out);
+  function check(){let ok=0;list.querySelectorAll("select").forEach(s=>{const good=s.value===PAIRS[+s.dataset.i][1];s.parentElement.classList.toggle("ok",good);s.parentElement.classList.toggle("no",!good);if(good)ok++;});
+    out.innerHTML="";out.append(el("div",{class:"result "+(ok===PAIRS.length?"good":"mid"),text:"Pares correctos: "+ok+" de "+PAIRS.length}));}
+}
+
+/* DILEMA */
+const DILEMMAS=[
+  {t:"Teleenfermería y responsabilidad",c:"Por videollamada, una enfermera indica antipiréticos a una puérpera de 5 días con fiebre de 38 °C. A las 12 horas la paciente ingresa con sepsis puerperal. La institución no tiene protocolo de teleenfermería.",q:["¿Qué datos debió valorar que no podía obtener a distancia?","¿Qué «banderas rojas» obligan a derivar a atención presencial?","¿Quién responde: la enfermera, la institución o ambos? Argumenten."]},
+  {t:"Romper el cristal",c:"Un paciente inconsciente llega a Emergencias. Su historia está restringida porque él pidió confidencialidad reforzada por su diagnóstico de VIH. Necesitan conocer su medicación habitual.",q:["¿Se justifica el acceso? Contrasten beneficencia y autonomía.","¿Qué condiciones debe cumplir ese acceso excepcional?","¿Se le informa al paciente cuando despierte? ¿Por qué?"]},
+  {t:"La orden verbal",c:"A las 02:00, Juan Pérez presenta SatO₂ de 86 %, FR 30 rpm y confusión. El médico ordena por teléfono subir el oxígeno y administrar furosemida. Al día siguiente niega haber dado la orden.",q:["¿Cómo debió registrarse la orden verbal?","Redacten la nota en formato SOAPIE.","¿Qué elementos del registro protegen a la enfermera?"]},
+  {t:"El algoritmo contra la enfermera",c:"El hospital adopta una IA que prioriza las alertas de telemonitoreo. En un mes, el personal deja de revisar las alertas de «riesgo bajo». Un paciente clasificado así sufre un evento adverso.",q:["¿Qué es el sesgo de automatización y cómo se previene?","¿Quién responde cuando el algoritmo falla?","Propongan tres reglas de uso seguro de la IA para el servicio."]},
+  {t:"Perfil personal o profesional",c:"Una enfermera con 80 000 seguidores publica contenido educativo y también opiniones personales sobre la gestión del hospital donde trabaja. La dirección le pide cerrar la cuenta.",q:["¿Dónde termina la libertad de expresión y empieza el deber profesional?","¿Debe separar perfiles? ¿Basta con eso?","¿Es legítima la solicitud de la dirección?"]}
+];
+function renderDilema(){
+  const box=$("#st-dilema");box.innerHTML="";
+  const card=el("div",{});
+  box.append(head(S("dilema"),"Saque un dilema al azar. Un grupo defiende una postura durante 3 minutos y otro la rebate. El resto evalúa los argumentos.",
+    el("button",{class:"btn small primary",type:"button",text:"Sacar dilema",onclick:draw})),card);
+  let last=-1;
+  function draw(){
+    let i;do{i=Math.floor(Math.random()*DILEMMAS.length);}while(i===last&&DILEMMAS.length>1);last=i;
+    const d=DILEMMAS[i];let who="";
+    if(G.n>=2){const [a,b]=shuffle([...Array(G.n).keys()]);who="Defiende: "+G.names[a]+" · Rebate: "+G.names[b];}
+    else who="Responde: "+G.names[0];
+    card.innerHTML="";card.append(el("div",{class:"dilemma"},el("div",{class:"who",text:who}),el("h3",{text:d.t}),el("p",{text:d.c}),el("ol",{},...d.q.map(x=>el("li",{text:x})))));
+  }
+  draw();
+}
+
+/* CRUCIGRAMA */
+const CWW=[
+  ["INTEGRIDAD","Propiedad del registro que se pierde si se borra un dato en lugar de enmendarlo."],
+  ["REVOCABLE","Así es el consentimiento que dio el paciente para publicar su imagen."],
+  ["ANONIMATO","Debe mantenerse en toda publicación sobre un caso clínico."],
+  ["HIBRIDO","Modelo de teleenfermería que combina llamadas, visitas y tecnología para no excluir a nadie."],
+  ["SECRETO","Deber profesional que sigue vigente cuando la enfermera usa redes sociales."],
+  ["SOAPIE","Formato de nota: subjetivo, objetivo, análisis, plan, intervención y evaluación."],
+  ["TRIAJE","Clasificación de prioridad que también se hace a distancia."],
+  ["NANDA","Taxonomía internacional de diagnósticos de enfermería."],
+  ["SESGO","___ de automatización: confiar ciegamente en lo que dice la IA."],
+  ["FIRMA","Elemento electrónico que identifica al autor de cada registro."]
+];
+function buildCW(){
+  const cells=new Map(),placed=[],K=(r,c)=>r+","+c,get=(r,c)=>cells.get(K(r,c));
+  const fits=(w,r,c,d)=>{const dr=d,dc=1-d;if(get(r-dr,c-dc)||get(r+dr*w.length,c+dc*w.length))return -1;let n=0;
+    for(let k=0;k<w.length;k++){const rr=r+dr*k,cc=c+dc*k,ch=get(rr,cc);if(ch){if(ch!==w[k])return -1;n++;}else if(get(rr+dc,cc+dr)||get(rr-dc,cc-dr))return -1;}return n;};
+  const put=(w,clue,r,c,d)=>{for(let k=0;k<w.length;k++)cells.set(K(r+d*k,c+(1-d)*k),w[k]);placed.push({w,clue,r,c,d});};
+  const list=[...CWW].sort((a,b)=>b[0].length-a[0].length);
+  put(list[0][0],list[0][1],0,0,0);
+  let pending=list.slice(1);
+  for(let pass=0;pass<3&&pending.length;pass++){
+    const next=[];
+    for(const [w,clue] of pending){
+      let best=null;
+      for(const [key,ch] of cells){const [rr,cc]=key.split(",").map(Number);
+        for(let k=0;k<w.length;k++){if(w[k]!==ch)continue;
+          for(const d of [0,1]){const r=rr-d*k,c=cc-(1-d)*k,s=fits(w,r,c,d);if(s<1)continue;
+            let r0=r,c0=c,r1=r+d*(w.length-1),c1=c+(1-d)*(w.length-1);
+            for(const k2 of cells.keys()){const [a,b]=k2.split(",").map(Number);if(a<r0)r0=a;if(a>r1)r1=a;if(b<c0)c0=b;if(b>c1)c1=b;}
+            const h=r1-r0+1,wd=c1-c0+1,score=s*1000-Math.max(h,wd)*10-h*wd/10;
+            if(!best||score>best.score)best={r,c,d,score};}}}
+      if(best)put(w,clue,best.r,best.c,best.d);else next.push([w,clue]);
+    }
+    pending=next;
+  }
+  let minR=Infinity,minC=Infinity,maxR=-Infinity,maxC=-Infinity;
+  for(const k of cells.keys()){const [a,b]=k.split(",").map(Number);minR=Math.min(minR,a);minC=Math.min(minC,b);maxR=Math.max(maxR,a);maxC=Math.max(maxC,b);}
+  const letters=new Map();for(const [k,v] of cells){const [a,b]=k.split(",").map(Number);letters.set(K(a-minR,b-minC),v);}
+  placed.forEach(p=>{p.r-=minR;p.c-=minC;});
+  placed.sort((a,b)=>a.r-b.r||a.c-b.c);
+  let n=0;const startNum=new Map();
+  placed.forEach(p=>{const k=K(p.r,p.c);if(!startNum.has(k))startNum.set(k,++n);p.n=startNum.get(k);});
+  return {placed,letters,rows:maxR-minR+1,cols:maxC-minC+1,K};
+}
+const CWD=buildCW();
+function renderCruci(){
+  const box=$("#st-cruci");box.innerHTML="";
+  const {placed,letters,rows,cols,K}=CWD;let dir=0,active=null;
+  const out=el("div",{});
+  box.append(head(S("cruci"),"Completen el crucigrama con conceptos de ambos temas. Toque una casilla dos veces para cambiar entre horizontal y vertical. No lleva tildes.",
+    el("button",{class:"btn small primary",type:"button",text:"Revisar",onclick:check}),
+    el("button",{class:"btn small",type:"button",text:"Mostrar solución",onclick:()=>{placed.forEach(p=>{for(let k=0;k<p.w.length;k++)inp(p.r+p.d*k,p.c+(1-p.d)*k).value=p.w[k];});}}),
+    el("button",{class:"btn small",type:"button",text:"Reiniciar",onclick:renderCruci})));
+  const owner=new Map();placed.forEach((p,i)=>{for(let k=0;k<p.w.length;k++){const key=K(p.r+p.d*k,p.c+(1-p.d)*k);if(!owner.has(key))owner.set(key,{});owner.get(key)[p.d]=i;}});
+  const nums=new Map();placed.forEach(p=>nums.set(K(p.r,p.c),p.n));
+  const grid=el("div",{class:"cwgrid",style:`grid-template-columns:repeat(${cols},minmax(0,1fr));width:min(100%,${cols*42}px)`});
+  const inp=(r,c)=>document.getElementById("cw-"+r+"-"+c);
+  const lists={0:el("ol",{class:"clues"}),1:el("ol",{class:"clues"})};
+  function highlight(){grid.querySelectorAll(".cwcell").forEach(x=>x.classList.remove("act"));box.querySelectorAll(".clues li").forEach(li=>li.classList.toggle("act",+li.dataset.i===active));
+    if(active==null)return;const p=placed[active];for(let k=0;k<p.w.length;k++)inp(p.r+p.d*k,p.c+(1-p.d)*k).parentElement.classList.add("act");}
+  function move(r,c,step){const p=placed[active];if(!p)return;const k=(p.d?r-p.r:c-p.c)+step;if(k>=0&&k<p.w.length)inp(p.r+p.d*k,p.c+(1-p.d)*k).focus();}
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const key=K(r,c);
+    if(!letters.has(key)){grid.append(el("div",{class:"cwblank"}));continue;}
+    const i=el("input",{id:"cw-"+r+"-"+c,maxlength:"1",autocomplete:"off",autocapitalize:"characters",spellcheck:"false","aria-label":"Fila "+(r+1)+", columna "+(c+1)});
+    const o=owner.get(key);
+    i.addEventListener("focus",()=>{if(o[dir]===undefined)dir=o[0]!==undefined?0:1;active=o[dir];highlight();});
+    i.addEventListener("mousedown",()=>{if(document.activeElement===i&&o[0]!==undefined&&o[1]!==undefined){dir=1-dir;active=o[dir];highlight();}});
+    i.addEventListener("input",()=>{const v=i.value.toUpperCase().replace(/[^A-ZÑ]/g,"");i.value=v.slice(-1);i.parentElement.classList.remove("ok","bad");if(v)move(r,c,1);});
+    i.addEventListener("keydown",e=>{
+      if(e.key==="Backspace"&&!i.value){e.preventDefault();move(r,c,-1);}
+      const arrows={ArrowRight:[0,1,0],ArrowLeft:[0,-1,0],ArrowDown:[1,0,1],ArrowUp:[-1,0,1]}[e.key];
+      if(arrows){e.preventDefault();dir=arrows[2];const t=inp(r+arrows[0],c+arrows[1]);if(t)t.focus();else{const oo=owner.get(key);if(oo[dir]!==undefined){active=oo[dir];highlight();}}}});
+    grid.append(el("div",{class:"cwcell"},nums.has(key)?el("span",{class:"num",text:nums.get(key)}):"",i));
+  }
+  placed.forEach((p,i)=>{const li=el("li",{"data-i":i},el("span",{class:"n",text:p.n}),el("div",{},el("div",{text:p.clue}),el("div",{class:"ans",text:p.w.length+" letras"})));
+    li.onclick=()=>{dir=p.d;inp(p.r,p.c).focus();active=i;highlight();};lists[p.d].append(li);});
+  box.append(el("div",{class:"ws"},grid,el("div",{style:"display:flex;flex-direction:column;gap:12px;min-width:0"},out,el("h3",{text:"Horizontales"}),lists[0],el("h3",{text:"Verticales"}),lists[1])));
+  function check(){let ok=0;
+    placed.forEach(p=>{let all=true;for(let k=0;k<p.w.length;k++){const e=inp(p.r+p.d*k,p.c+(1-p.d)*k),good=e.value===p.w[k];if(!good)all=false;e.parentElement.classList.toggle("ok",good);e.parentElement.classList.toggle("bad",!good);}if(all)ok++;});
+    out.innerHTML="";out.append(el("div",{class:"result "+(ok===placed.length?"good":"mid"),text:"Palabras completas y correctas: "+ok+" de "+placed.length}));}
+}
+
+/* NANDA - NIC */
+const NANDA=[
+  ["SatO₂ 86 %, FR 30 rpm, confusión de inicio reciente.","Deterioro del intercambio de gases","Oxigenoterapia"],
+  ["Tos productiva con secreciones espesas que no logra expulsar; roncus en base derecha.","Limpieza ineficaz de las vías aéreas","Mejorar la tos"],
+  ["T° 38,5 °C, piel caliente al tacto, FC 98 lpm.","Hipertermia","Tratamiento de la fiebre"],
+  ["Refiere dolor torácico 3/10, punzante, que aumenta con la tos; expresión facial de dolor.","Dolor agudo","Manejo del dolor"],
+  ["DM2, infección activa, ingesta oral disminuida; glucemia actual 168 mg/dL.","Riesgo de nivel de glucemia inestable","Manejo de la hiperglucemia"],
+  ["Pregunta para qué sirve el oxígeno y se retira la cánula al dormir.","Conocimientos deficientes","Enseñanza: procedimiento/tratamiento"],
+  ["68 años, DM2, catéter venoso periférico con 72 h de permanencia.","Riesgo de infección","Mantenimiento de dispositivos de acceso venoso"],
+  ["Refiere temor a «morir ahogado», está inquieto y pregunta varias veces por su familia.","Ansiedad","Disminución de la ansiedad"]
+];
+function renderNanda(){
+  const box=$("#st-nanda");box.innerHTML="";const out=el("div",{});
+  const dx=shuffle(NANDA.map(n=>n[1])),nic=shuffle(NANDA.map(n=>n[2]));
+  box.append(head(S("nanda"),"Segundo día de hospitalización de Juan Pérez. Para cada grupo de datos, elijan la etiqueta diagnóstica NANDA y la intervención NIC prioritaria. Cada opción se usa una sola vez.",
+    el("button",{class:"btn small primary",type:"button",text:"Revisar",onclick:check}),
+    el("button",{class:"btn small",type:"button",text:"Reiniciar",onclick:renderNanda})));
+  const list=el("div",{class:"match"},el("div",{class:"nhead"},el("span",{text:"Datos de valoración"}),el("span",{text:"Diagnóstico NANDA"}),el("span",{text:"Intervención NIC"})));
+  shuffle(NANDA.map((_,i)=>i)).forEach((i,k)=>{
+    const s1=el("select",{id:"nd"+k,"data-i":i,"data-col":"1","aria-label":"Diagnóstico para: "+NANDA[i][0]},el("option",{value:"",text:"Diagnóstico…"}),...dx.map(o=>el("option",{value:o,text:o})));
+    const s2=el("select",{id:"ni"+k,"data-i":i,"data-col":"2","aria-label":"Intervención para: "+NANDA[i][0]},el("option",{value:"",text:"Intervención…"}),...nic.map(o=>el("option",{value:o,text:o})));
+    list.append(el("div",{class:"nrow"},el("span",{text:NANDA[i][0]}),s1,s2));
+  });
+  box.append(list,out,el("p",{class:"muted",text:"Las etiquetas siguen la denominación usual en español de NANDA-I y NIC. Si su carrera usa otra edición, aproveche las diferencias para discutir."}));
+  function check(){let ok=0;list.querySelectorAll("select").forEach(s=>{const good=s.value===NANDA[+s.dataset.i][+s.dataset.col];s.classList.toggle("ok",good);s.classList.toggle("no",!good);if(good)ok++;});
+    out.innerHTML="";out.append(el("div",{class:"result "+(ok===NANDA.length*2?"good":"mid"),text:"Aciertos: "+ok+" de "+NANDA.length*2}));}
+}
+
+/* INICIO */
+renderGroups();renderPlan();renderSopa(20261107);renderCruci();renderNanda();renderError();renderOrden(true);renderJuicio();renderEmpareja();renderDilema();drawClock();
+show(STATIONS.some(s=>s.id===current)?current:"plan");
+})();
+</script>
+
+</body>
+</html>

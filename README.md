@@ -32,3 +32,13 @@ Abra `preguntas.js` en GitHub, pulse el lápiz (**Edit**), cambie los textos ent
 - Pulse **Mostrar respuesta** y asigne los puntos: valor completo si acierta, la mitad en un rebote.
 - La **Pregunta final** permite dar hasta 500 puntos a cada equipo.
 - **Reiniciar juego** borra los puntajes para otro grupo. El progreso se guarda en el navegador de la docente.
+
+## Rally de Enfermería Digital (`rally.html`)
+
+Segundo juego, por estaciones, para la misma unidad (Tema 3: redes sociales y teleenfermería; Tema 4: registros sanitarios electrónicos). En Vercel se abre agregando `/rally.html` al enlace del proyecto, por ejemplo `https://desafio-enfermeria-digital.vercel.app/rally.html`.
+
+- Elija la cantidad de grupos (de 1 a 12) y escriba sus nombres. La página reparte las estaciones por rondas.
+- En **Plan de rondas** puede desmarcar las estaciones que no quiera usar.
+- Estaciones: sopa de letras con pistas, crucigrama, detecta el error en una nota de enfermería, diagnóstico NANDA e intervención NIC, ordena los pasos de un protocolo, ¿correcto o falta?, riesgo y medida, y un dilema final para debatir.
+- Cada grupo tiene botones para sumar o restar puntos y hay un cronómetro de 3 a 10 minutos.
+- Los puntajes se guardan en el navegador de la docente.
