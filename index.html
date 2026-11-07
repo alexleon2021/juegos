@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Desafío Enfermería Digital</title>
+<meta name="description" content="Juego de preguntas por equipos de la Unidad 3 de TIC aplicada en Enfermería (Maestría en Enfermería).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="kicker">TIC aplicada en Enfermería · Unidad 3 · Domingo</div>
+      <h1>Desafío Enfermería Digital</h1>
+    </div>
+    <div class="tools">
+      <label class="row"><span class="lbl">Equipos</span>
+        <select id="nteams" aria-label="Número de equipos">
+          <option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option>
+        </select></label>
+      <button id="resetBtn" type="button">Reiniciar juego</button>
+    </div>
+  </header>
+  <div class="confirm" id="confirmReset" hidden>
+    ¿Borrar puntajes y volver a habilitar todas las preguntas?
+    <button type="button" class="primary" id="resetYes">Sí, reiniciar</button>
+    <button type="button" id="resetNo">Cancelar</button>
+  </div>
+
+  <div class="board-scroll"><div class="board" id="board"></div></div>
+  <div class="final"><button type="button" id="finalBtn">Pregunta final</button></div>
+
+  <section class="scores" id="scores" aria-label="Marcador"></section>
+
+  <p class="rules"><b>Cómo se juega.</b> Por turnos, cada equipo elige una categoría y un valor. Al abrir la pregunta corre un tiempo de 30 segundos y el vocero del equipo responde por micrófono o en el chat. Si acierta, suma el valor. Si falla, otro equipo puede «rebotar» y gana la mitad. Al final, la pregunta final vale hasta 500 puntos para cada equipo.</p>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="qText">
+    <div class="meta"><span class="tag" id="qTag"></span><span class="timer" id="timer">30</span></div>
+    <p class="q" id="qText"></p>
+    <div id="qExtra"></div>
+    <div class="row">
+      <button type="button" id="timerBtn">Iniciar tiempo</button>
+      <button type="button" class="primary" id="showBtn">Mostrar respuesta</button>
+    </div>
+    <div class="answer" id="answer" hidden></div>
+    <div id="awardBox" hidden></div>
+    <div class="row"><button type="button" id="closeBtn">Cerrar y volver al tablero</button></div>
+  </div>
+</div>
+
+
+<script src="preguntas.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>
