@@ -100,7 +100,7 @@ ol.sub{margin:0;padding-left:1.3em;display:grid;gap:6px}
 .cell.sel{background:var(--gold-soft);color:var(--night)}
 .cell.found{background:var(--gold);color:var(--night)}
 .clues{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.clues li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:baseline;padding:4px 6px 8px;border-bottom:1px dashed var(--line);cursor:pointer}
+.clues li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:4px 6px 8px;border-bottom:1px dashed var(--line);cursor:pointer}
 .clues .n{font-family:"JetBrains Mono",ui-monospace,monospace;color:var(--muted);font-size:.85rem}
 .clues .ans{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.85rem;color:var(--muted);letter-spacing:.08em}
 .clues li.ok .ans{color:var(--ok);font-weight:700}
@@ -166,3 +166,8 @@ ol.sub{margin:0;padding-left:1.3em;display:grid;gap:6px}
 .dilemma{border:2px solid var(--gold);border-radius:12px;padding:20px;display:grid;gap:12px}
 .dilemma ol{margin:0;padding-left:1.3em;display:grid;gap:6px}
 .dilemma .who{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.88rem;color:var(--gold-soft)}
+
+/* botón para marcar la palabra que dijeron los estudiantes */
+.clues .mark{align-self:center;width:38px;height:38px;padding:0;border-radius:50%;font-weight:800;font-size:1.05rem;border:2px solid var(--ok);color:var(--ok);background:transparent}
+.clues .mark:hover{background:rgba(63,191,127,.18)}
+.clues .mark.undo{border-color:var(--line);color:var(--muted);font-size:.95rem}

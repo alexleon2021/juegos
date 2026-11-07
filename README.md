@@ -41,6 +41,7 @@ Abra `preguntas.js` en GitHub, pulse el lápiz (**Edit**), cambie los textos ent
 
 - Elija el número de equipos (de 2 a 25) y escriba sus nombres en el marcador.
 - Por turnos, cada equipo elige una categoría y un valor. Pulse **Iniciar tiempo**: 30 segundos para las preguntas, 90 para los casos y de 4 a 5 minutos para las actividades.
+- En la sopa de letras y el crucigrama, los estudiantes dicen las palabras y usted toca ✓ en la pista para marcarla (↺ la desmarca).
 - Pulse **Mostrar respuesta** (o **Revisar y ver solución** en las actividades) y asigne los puntos: valor completo si lo resolvieron bien, la mitad si fue un rebote o un resultado parcial.
 - La **Pregunta final** permite dar hasta 500 puntos a cada equipo.
 - **Reiniciar juego** borra los puntajes para otro grupo. El progreso se guarda en el navegador de la docente.

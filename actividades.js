@@ -182,14 +182,19 @@ const CWD=buildCW();
 // render(caja) devuelve {check}: check() revisa, muestra la solución y devuelve el texto del resultado.
 const ACTIVIDADES={
  sopa:{title:"Sopa de letras",time:300,
-  intro:"Deduzcan cada palabra a partir de su pista y búsquenla en la sopa: puede estar en horizontal, vertical, diagonal y al revés. Arrastren sobre las letras para marcarla.",
+  intro:"Los equipos deducen cada palabra a partir de su pista y la buscan en la sopa (horizontal, vertical, diagonal o al revés). Cuando la digan bien, toque ✓ en la pista y la palabra se marca sola. También puede arrastrar sobre las letras.",
   render(box){
     const ws=buildWS(Math.floor(Math.random()*100000));
     const grid=h("div",{class:"wsgrid",style:"grid-template-columns:repeat("+SIZE+",1fr)","aria-label":"Sopa de letras"});
     ws.grid.forEach((ch,i)=>grid.append(h("div",{class:"cell","data-i":i,text:ch})));
     const ol=h("ol",{class:"clues"});let reveal=false;
+    const cellsOf=w=>ws.place.find(p=>p.w===w).cells;
+    function markWord(w,on){if(on){ws.found.add(w);cellsOf(w).forEach(i=>grid.children[i].classList.add("found"));}
+      else{ws.found.delete(w);const keep=new Set();ws.found.forEach(x=>cellsOf(x).forEach(i=>keep.add(i)));cellsOf(w).forEach(i=>{if(!keep.has(i))grid.children[i].classList.remove("found");});}
+      drawClues();}
     function drawClues(){ol.innerHTML="";WORDS.forEach(([w,clue],k)=>{const got=ws.found.has(w);
-      ol.append(h("li",{class:got?"ok":(reveal?"miss":null)},h("span",{class:"n",text:String(k+1).padStart(2,"0")}),h("div",{},h("div",{text:clue}),h("div",{class:"ans",text:got||reveal?w:"_ ".repeat(w.length).trim()+"  ("+w.length+")"}))));});}
+      const mark=reveal?null:h("button",{type:"button",class:"mark"+(got?" undo":""),title:got?"Desmarcar":"La dijeron bien","aria-label":(got?"Desmarcar ":"Marcar como dicha: ")+"pista "+(k+1),text:got?"↺":"✓",onclick:()=>markWord(w,!got)});
+      ol.append(h("li",{class:got?"ok":(reveal?"miss":null)},h("span",{class:"n",text:String(k+1).padStart(2,"0")}),h("div",{},h("div",{text:clue}),h("div",{class:"ans",text:got||reveal?w:"_ ".repeat(w.length).trim()+"  ("+w.length+")"})),mark));});}
     box.append(h("div",{class:"split"},grid,h("div",{class:"col"},ol)));
     let start=null,line=[];
     const cellAt=e=>{const t=document.elementFromPoint(e.clientX,e.clientY);return t&&t.classList.contains("cell")?+t.dataset.i:null;};
@@ -203,7 +208,7 @@ const ACTIVIDADES={
     const end=()=>{if(start===null)return;
       const key=line.join(","),rev=line.slice().reverse().join(",");
       const hit=ws.place.find(p=>!ws.found.has(p.w)&&(p.cells.join(",")===key||p.cells.join(",")===rev));
-      if(hit){ws.found.add(hit.w);hit.cells.forEach(i=>grid.children[i].classList.add("found"));drawClues();}
+      if(hit)markWord(hit.w,true);
       start=null;line=[];paint();};
     grid.addEventListener("pointerup",end);grid.addEventListener("pointercancel",end);
     drawClues();
@@ -212,7 +217,7 @@ const ACTIVIDADES={
   }},
 
  cruci:{title:"Crucigrama",time:300,
-  intro:"Completen el crucigrama con conceptos de ambos temas. Toquen una casilla dos veces para cambiar entre horizontal y vertical. No lleva tildes.",
+  intro:"Los equipos dicen la palabra de cada pista. Cuando la digan bien, toque ✓ en la pista y la palabra se escribe sola en el crucigrama. También puede escribirla tocando las casillas. No lleva tildes.",
   render(box){
     const {placed,letters,rows,cols,K}=CWD;let dir=0,active=null;
     const inp=(r,c)=>box.querySelector("#cw-"+r+"-"+c);
@@ -237,10 +242,19 @@ const ACTIVIDADES={
         if(ar){e.preventDefault();dir=ar[2];const t=inp(r+ar[0],c+ar[1]);if(t)t.focus();else if(o[dir]!==undefined){active=o[dir];highlight();}}});
       grid.append(h("div",{class:"cwcell"},nums.has(key)?h("span",{class:"num",text:nums.get(key)}):null,i));
     }
-    placed.forEach((p,i)=>{const li=h("li",{"data-i":i},h("span",{class:"n",text:p.n}),h("div",{},h("div",{text:p.clue}),h("div",{class:"ans",text:p.w.length+" letras"})));
+    const said=new Set();
+    const cellsOf=p=>p.w.split("").map((ch,k)=>[inp(p.r+p.d*k,p.c+(1-p.d)*k),ch]);
+    function markWord(i,on){const p=placed[i];
+      if(on){said.add(i);cellsOf(p).forEach(([e,ch])=>{e.value=ch;e.parentElement.classList.add("ok");});}
+      else{said.delete(i);const keep=new Set();said.forEach(j=>cellsOf(placed[j]).forEach(([e])=>keep.add(e)));cellsOf(p).forEach(([e])=>{if(!keep.has(e)){e.value="";e.parentElement.classList.remove("ok");}});}
+      const li=box.querySelector('.clues li[data-i="'+i+'"]'),b=li.querySelector(".mark");
+      li.classList.toggle("ok",on);b.textContent=on?"↺":"✓";b.classList.toggle("undo",on);b.title=on?"Desmarcar":"La dijeron bien";}
+    placed.forEach((p,i)=>{
+      const mark=h("button",{type:"button",class:"mark",title:"La dijeron bien","aria-label":"Marcar como dicha: pista "+p.n,text:"✓",onclick:e=>{e.stopPropagation();markWord(i,!said.has(i));}});
+      const li=h("li",{"data-i":i},h("span",{class:"n",text:p.n}),h("div",{},h("div",{text:p.clue}),h("div",{class:"ans",text:p.w.length+" letras"})),mark);
       li.onclick=()=>{dir=p.d;inp(p.r,p.c).focus();active=i;highlight();};lists[p.d].append(li);});
     box.append(h("div",{class:"split"},grid,h("div",{class:"col"},h("h3",{text:"Horizontales"}),lists[0],h("h3",{text:"Verticales"}),lists[1])));
-    return {check(){let ok=0;
+    return {check(){let ok=0;box.querySelectorAll(".mark").forEach(b=>b.remove());
       placed.forEach(p=>{let all=true;for(let k=0;k<p.w.length;k++){const e=inp(p.r+p.d*k,p.c+(1-p.d)*k),good=e.value===p.w[k];if(!good){all=false;e.value=p.w[k];}e.parentElement.classList.toggle("ok",good);e.parentElement.classList.toggle("bad",!good);}if(all)ok++;});
       return "Palabras correctas: "+ok+" de "+placed.length+". Las casillas en rojo muestran la letra correcta.";}};
   }},
