@@ -65,3 +65,9 @@ table.mini td,table.mini th{border:1px solid var(--line);padding:4px 10px;text-a
 .award{font-size:.9rem}
 .confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+/* menú entre juegos */
+.gnav{display:flex;flex-wrap:wrap;gap:6px}
+.gnav a{border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:700;text-decoration:none;color:var(--ink);background:var(--panel);font-size:.92rem}
+.gnav a:hover{border-color:var(--gold)}
+.gnav a[aria-current="page"]{background:var(--gold);color:var(--night);border-color:var(--gold)}

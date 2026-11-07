@@ -10,6 +10,8 @@ Juego de preguntas por equipos para la Unidad 3 de **TIC aplicada en Enfermería
 | `preguntas.js` | Las preguntas y respuestas (aquí se editan) |
 | `juego.js` | El funcionamiento del juego |
 | `estilos.css` | Colores y diseño |
+| `rally.html` | Rally de Enfermería Digital, juego por estaciones |
+| `banco-preguntas.html` | Banco de preguntas avanzadas con respuestas ocultas |
 
 ## Publicar en GitHub y Vercel
 
@@ -42,3 +44,7 @@ Segundo juego, por estaciones, para la misma unidad (Tema 3: redes sociales y te
 - Estaciones: sopa de letras con pistas, crucigrama, detecta el error en una nota de enfermería, diagnóstico NANDA e intervención NIC, ordena los pasos de un protocolo, ¿correcto o falta?, riesgo y medida, y un dilema final para debatir.
 - Cada grupo tiene botones para sumar o restar puntos y hay un cronómetro de 3 a 10 minutos.
 - Los puntajes se guardan en el navegador de la docente.
+
+## Banco de preguntas avanzadas (`banco-preguntas.html`)
+
+Quince preguntas de selección múltiple con caso clínico, cinco casos de análisis y cuatro preguntas de reflexión. Las respuestas aparecen al pulsar **Mostrar respuestas**. Se abre con `/banco-preguntas.html` o desde el menú de arriba de cualquiera de los juegos.

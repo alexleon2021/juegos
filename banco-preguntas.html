@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Banco de Preguntas Avanzadas</title>
+<meta name="description" content="Preguntas de nivel avanzado para graduados de Enfermería: Unidad 3, Temas 3 y 4.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: documento de una columna para proyectar o leer; respuestas ocultas hasta que la docente las muestra. */
+:root{
+  --bg:#EDF3F1; --surface:#FFFFFF; --ink:#0F2E2A; --muted:#52706B; --line:#C7D8D3;
+  --accent:#0B7A68; --accent-ink:#FFFFFF; --accent-soft:#D4EBE5;
+  --ok:#1D7438; --ok-soft:#DCF0E1;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0D1917; --surface:#142422; --ink:#E2EEEB; --muted:#8EABA5; --line:#2A423E;
+  --accent:#3CC3A6; --accent-ink:#06201B; --accent-soft:#183B35; --ok:#62D08F; --ok-soft:#173424; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0D1917; --surface:#142422; --ink:#E2EEEB; --muted:#8EABA5; --line:#2A423E;
+  --accent:#3CC3A6; --accent-ink:#06201B; --accent-soft:#183B35; --ok:#62D08F; --ok-soft:#173424; color-scheme:dark; }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 56px}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(1.7rem,3.6vw,2.5rem);font-weight:800}
+h2{font-size:1.4rem;font-weight:800}
+h3{font-size:1.08rem;font-weight:600}
+p{margin:0}
+.eyebrow{font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
+.muted{color:var(--muted)}
+.gnav{display:flex;flex-wrap:wrap;gap:6px}
+.gnav a{border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:700;text-decoration:none;color:var(--ink);background:var(--surface);font-size:.92rem}
+.gnav a[aria-current="page"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;font-weight:700}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+section{display:flex;flex-direction:column;gap:16px}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.q .tag{font-family:var(--f-mono);font-size:.78rem;color:var(--accent);font-weight:700}
+.q .stem{font-weight:700}
+.q ol{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.q ol li{border:1px solid var(--line);border-radius:8px;padding:6px 12px;display:grid;grid-template-columns:1.6em minmax(0,1fr);gap:6px}
+.q ol li .l{font-family:var(--f-mono);font-weight:700;color:var(--muted)}
+.show .q ol li.right{border-color:var(--ok);background:var(--ok-soft)}
+.why{display:none;border-left:4px solid var(--ok);background:var(--ok-soft);padding:8px 12px;border-radius:0 8px 8px 0;font-size:.95rem}
+.show .why{display:block}
+.case ol{list-style:decimal;padding-left:1.3em}
+.case ol li{display:list-item;border:0;padding:0}
+.case ol li::marker{font-family:var(--f-mono);color:var(--muted)}
+.tip{border:1px dashed var(--accent);border-radius:10px;padding:12px 16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:12px">
+    <nav class="gnav" aria-label="Juegos y materiales">
+      <a href="index.html">Desafío</a>
+      <a href="rally.html">Rally</a>
+      <a href="banco-preguntas.html" aria-current="page">Banco de preguntas</a>
+    </nav>
+    <div class="eyebrow">Unidad 3 · Tema 3 Redes sociales y teleenfermería · Tema 4 Registros sanitarios electrónicos</div>
+    <h1>Banco de Preguntas Avanzadas</h1>
+    <p class="muted" style="max-width:65ch">Preguntas para graduados de Enfermería: piden aplicar, analizar y decidir en situaciones clínicas y éticas. Las respuestas quedan ocultas hasta que usted las muestre.</p>
+  </header>
+
+  <div class="bar">
+    <button class="primary" id="toggle" type="button" aria-pressed="false">Mostrar respuestas</button>
+    <span class="muted" style="font-size:.9rem">Parte A: 15 preguntas · Parte B: 5 casos · Parte C: 4 reflexiones</span>
+  </div>
+
+  <section id="partA" aria-labelledby="hA">
+    <h2 id="hA">Parte A. Selección múltiple con caso clínico</h2>
+    <p class="muted">Una sola respuesta correcta.</p>
+    <div id="listA" style="display:flex;flex-direction:column;gap:14px"></div>
+  </section>
+
+  <section aria-labelledby="hB">
+    <h2 id="hB">Parte B. Casos de análisis</h2>
+    <p class="muted">Respuesta abierta, para desarrollo escrito o debate.</p>
+    <div id="listB" style="display:flex;flex-direction:column;gap:14px"></div>
+    <p class="tip">Para evaluar la Parte B, use una rúbrica de tres criterios: fundamento ético-legal, juicio clínico y calidad del registro propuesto.</p>
+  </section>
+
+  <section aria-labelledby="hC">
+    <h2 id="hC">Parte C. Reflexión crítica</h2>
+    <p class="muted">Ensayo corto.</p>
+    <div class="q case"><ol id="listC"></ol></div>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+const A=[
+ ["Redes sociales · confidencialidad","Una enfermera de UCI publica en su perfil personal: «Turno durísimo, perdimos a un paciente de 34 años del accidente de la Vía Perimetral 🙏». No incluye nombre ni foto. ¿Cuál es la valoración correcta?",
+  ["Es aceptable, porque no hay datos identificativos directos.","Es aceptable si su perfil es privado.","Vulnera la confidencialidad, porque la edad, el evento y el lugar permiten identificar al paciente de forma indirecta.","Solo es falta si la familia presenta una queja."],2,
+  "La identificación indirecta (edad, evento y lugar) también vulnera el secreto profesional."],
+ ["Redes sociales · consentimiento","Retomando el Caso Práctico 1: el paciente firmó un consentimiento para la foto. Tres semanas después pide que se retire, pero la publicación ya fue compartida miles de veces. ¿Cuál es la afirmación más precisa?",
+  ["El consentimiento firmado protege totalmente a la enfermera y no está obligada a hacer nada.","El consentimiento es revocable. Debe retirar la publicación de inmediato y documentar la acción, aunque no pueda controlar las copias de terceros.","Debe retirarla solo si el paciente demuestra un daño.","Basta con editar la publicación y desenfocar la cara."],1,
+  "El consentimiento es revocable en cualquier momento. La enfermera responde por su publicación, aunque no pueda controlar las copias de terceros."],
+ ["Redes sociales · desinformación","En el Caso 3 (remedio natural para la diabetes), ¿cuál es la intervención más adecuada desde la responsabilidad profesional?",
+  ["Denunciar el grupo y no comentar, para no darle visibilidad.","Comentar identificándose como profesional, con lenguaje empático, explicando el riesgo de abandonar el tratamiento y enlazando a una fuente oficial (MSP, OPS o ADA).","Publicar que quienes lo prueben ponen su vida en riesgo, para generar impacto.","Escribir en privado a cada persona que dijo que lo probaría."],1,
+  "Corregir con evidencia, de forma no confrontacional y con fuentes oficiales es parte de su deber de educación sanitaria."],
+ ["Teleenfermería · modalidades","Un paciente con insuficiencia cardíaca en telemonitoreo sube 2,1 kg en 48 horas, según su balanza conectada. Refiere «solo un poco de cansancio» por videollamada. ¿Cuál es la conducta prioritaria?",
+  ["Registrar el dato y revalorar en la próxima videollamada programada.","Reforzar la educación sobre la restricción de sodio.","Reconocer un signo de descompensación y escalar según el protocolo (contactar al médico tratante o derivar a valoración presencial), aunque el síntoma subjetivo sea leve.","Pedirle que se vuelva a pesar mañana para confirmar."],2,
+  "Un aumento de peso de más de 1 kg en 24 h o de unos 2 kg en pocos días es un signo de alarma de descompensación. El dato objetivo pesa más que el síntoma subjetivo leve."],
+ ["Teleenfermería · limitaciones de la valoración","¿Cuál de los siguientes hallazgos es menos fiable de valorar por videoconsulta y exige una estrategia alternativa?",
+  ["Patrón respiratorio y uso de músculos accesorios.","Estado de conciencia y orientación.","Edema con fóvea y llenado capilar.","Adherencia referida al tratamiento."],2,
+  "El edema con fóvea y el llenado capilar requieren exploración táctil. Son la principal limitación de la valoración a distancia."],
+ ["Teleenfermería · implementación","En el Caso 2 (hospital rural, diabéticos sin internet estable), ¿qué propuesta respeta mejor el principio de equidad?",
+  ["Postergar el programa hasta que haya cobertura de internet.","Incluir solo a los pacientes con smartphone y conexión estable.","Diseñar un modelo híbrido: SMS o llamada telefónica para reportar glucemias, visitas domiciliarias de apoyo y cuidadores capacitados como enlace.","Entregar tablets a todos los pacientes sin capacitación previa."],2,
+  "Un modelo híbrido adapta la tecnología al contexto y no excluye a los pacientes más vulnerables."],
+ ["IA y monitoreo remoto","Un sistema de IA clasifica como «riesgo bajo» a un paciente posquirúrgico. La enfermera, por videollamada, nota palidez, diaforesis y respuestas lentas. ¿Qué debe hacer?",
+  ["Seguir la clasificación del algoritmo, que está validado con miles de casos.","Priorizar su juicio clínico, escalar la atención y documentar la discrepancia con el sistema.","Esperar la próxima lectura automática para confirmar.","Pedir a otra enfermera que revise el algoritmo."],1,
+  "La IA es una herramienta de apoyo. La responsabilidad y el juicio clínico son del profesional."],
+ ["RSE · interoperabilidad","Un paciente atendido en un centro de salud del primer nivel llega a Emergencias de un hospital de otra red. Su alergia a la penicilina consta en el sistema del centro de salud, pero no aparece en el hospital, y le administran amoxicilina. ¿Qué característica del RSE falló principalmente?",
+  ["Accesibilidad","Interoperabilidad","Cifrado","Autenticación"],1,
+  "Los datos existían, pero no se compartieron entre sistemas distintos."],
+ ["RSE · registro de síntomas subjetivos","Juan Pérez refiere dolor torácico leve. ¿Cuál es el registro más correcto?",
+  ["«Paciente con dolor torácico leve, sin importancia.»","«Paciente ansioso por el dolor.»","«Refiere dolor torácico 3/10 (EVA), tipo punzante, en hemitórax derecho, que aumenta con la tos. FC 98, SatO₂ 92 % con O₂ a 2 L/min. Se informa al médico de turno a las 14:20.»","«Dolor torácico. Se administra analgesia.»"],2,
+  "El registro es objetivo, medible, con hallazgos asociados, hora y comunicación al equipo."],
+ ["RSE · corrección de errores","Usted registró 2 g de ceftriaxona cuando administró 1 g, y lo detecta dos horas después. ¿Cuál es el procedimiento correcto?",
+  ["Borrar la entrada y escribirla de nuevo con el dato correcto.","Pedir al administrador del sistema que elimine el registro.","Hacer una enmienda o anotación aclaratoria, sin eliminar la original, con fecha, hora, motivo y su identificación. Verificar además si el error tuvo impacto clínico y notificarlo según el protocolo institucional.","Dejarlo así, porque el paciente recibió la dosis correcta."],2,
+  "La integridad del registro exige no borrar el original. La corrección también tiene que poder rastrearse."],
+ ["Confidencialidad · mínimo necesario","Una enfermera de consulta externa consulta la historia clínica de un vecino hospitalizado en otro servicio «solo para saber cómo está». Tiene credenciales válidas. ¿Cómo se valora esta acción?",
+  ["Es lícita, porque tiene usuario autorizado en el sistema.","Es una falta solo si divulga lo que leyó.","Es un acceso indebido: el acceso se justifica por la relación asistencial, no por tener credenciales. Además quedará registrado en la auditoría.","Es aceptable si lo hace por preocupación genuina."],2,
+  "Tener permiso técnico de acceso no equivale a estar autorizado: falta la relación asistencial."],
+ ["Confidencialidad · familiares","El hijo de Juan Pérez exige ver el historial porque «es su papá y paga la cuenta». El paciente está consciente y orientado. ¿Qué corresponde?",
+  ["Mostrarle el historial, porque es familiar de primer grado.","Negarse y llamar a seguridad.","Explicar con respeto que la información pertenece al paciente y preguntar a Juan si autoriza que se comparta y qué información; derivar la información médica al profesional que corresponda.","Darle un resumen verbal sin el diagnóstico."],2,
+  "La información pertenece al paciente capaz. Se respeta su autonomía y se aplica el principio de mínimo necesario."],
+ ["Seguridad · medidas técnicas","En la estación de enfermería, un colega deja su sesión del RSE abierta y usted necesita registrar urgentemente un signo vital. ¿Qué es lo correcto?",
+  ["Registrar en la sesión abierta para no perder tiempo.","Cerrar esa sesión, ingresar con su propio usuario y registrar. Recordar al colega el cierre de sesión.","Registrar en la sesión abierta y avisarle al colega después.","Anotarlo en papel y que el colega lo transcriba."],1,
+  "Cada registro debe quedar firmado por quien lo realiza (autenticación y no repudio)."],
+ ["Normativa · Ecuador","Según la Ley Orgánica de Protección de Datos Personales del Ecuador (2021), los datos de salud son:",
+  ["Datos públicos cuando el paciente es atendido en el sistema público.","Datos sensibles, cuyo tratamiento exige mayores garantías.","Datos anónimos por naturaleza.","Datos de libre uso con fines de investigación."],1,
+  "La LOPDP clasifica los datos relativos a la salud como datos sensibles."],
+ ["Gestión del cuidado · trazabilidad","¿Qué registro demuestra mejor la evaluación dentro del proceso de atención de enfermería?",
+  ["«Se administró paracetamol 1 g IV a las 10:00.»","«Paciente con riesgo de caídas.»","«A las 11:00, T° 37,2 °C (antes 38,5 °C). Objetivo de termorregulación alcanzado parcialmente; se mantiene el plan.»","«Paciente tranquilo.»"],2,
+  "Compara el resultado con el objetivo y decide sobre el plan, que es lo que define la evaluación."]
+];
+const B=[
+ ["El chat del servicio","El grupo de WhatsApp del servicio se usa para coordinar turnos. Una enfermera envía la foto de una herida con el nombre del paciente visible en la pulsera, para pedir opinión sobre la curación.",
+  ["Identifique al menos tres riesgos de seguridad y privacidad en esta práctica.","La intención es clínicamente válida (consultar a un colega). ¿Qué canal y qué condiciones lo harían aceptable?","Si usted es la líder del servicio, ¿qué acción correctiva y qué acción preventiva propondría?"]],
+ ["Teleenfermería y responsabilidad legal","Una enfermera da indicaciones por videollamada a una paciente puérpera de 5 días con fiebre de 38 °C y le recomienda antipiréticos y control. A las 12 horas la paciente ingresa con sepsis puerperal.",
+  ["¿Qué datos debió valorar y no podía obtener a distancia?","¿Cuáles son los criterios de «bandera roja» que obligan a derivar a atención presencial en teleenfermería?","¿Qué debió quedar documentado en el RSE para respaldar la actuación profesional?","Analice el vacío normativo: ¿quién responde si no hay un protocolo institucional de teleenfermería?"]],
+ ["Acceso de emergencia («romper el cristal»)","Un paciente inconsciente llega a Emergencias. Su historia está restringida porque él mismo solicitó confidencialidad reforzada (diagnóstico de VIH). La enfermera necesita conocer su medicación habitual.",
+  ["¿Se justifica el acceso? Argumente con los principios de beneficencia y autonomía.","¿Qué condiciones debe cumplir ese acceso excepcional (justificación, registro, auditoría)?","Cuando el paciente recupere la conciencia, ¿se le debe informar del acceso? ¿Por qué?"]],
+ ["Auditoría de accesos","La auditoría del RSE muestra que la historia de una figura pública ingresada fue abierta 47 veces en 24 horas, incluidas 19 consultas de personal que no participaba en su cuidado.",
+  ["¿Qué medida técnica permitió detectar el problema y qué otras lo habrían prevenido?","Diferencie la responsabilidad individual de los usuarios de la responsabilidad institucional.","¿Cómo afecta este episodio a la confianza paciente–profesional y a la institución?"]],
+ ["Ampliación del caso Juan Pérez","A las 02:00, Juan presenta SatO₂ de 86 %, FR 30 rpm y confusión. Usted llama al médico, que da una indicación verbal de aumentar el oxígeno y pasar un bolo de furosemida.",
+  ["Redacte la nota de enfermería en formato SOAPIE o con taxonomía NANDA-NIC-NOC.","¿Cómo debe registrarse una orden verbal para que sea trazable y legalmente válida?","Al día siguiente, el médico niega haber dado la orden. ¿Qué elementos del registro protegen a la enfermera?"]]
+];
+const C=[
+ "«La IA no sustituye al profesional de enfermería.» Argumente a favor o en contra, considerando el sesgo de automatización (confiar en exceso en el sistema) y quién asume la responsabilidad cuando un algoritmo falla.",
+ "La brecha digital afecta más a los adultos mayores y a la población rural, que son a la vez los que más se beneficiarían de la teleenfermería. ¿Cómo resolvería esta paradoja desde la gestión del cuidado?",
+ "¿Debe un enfermero tener un perfil profesional separado del personal en redes sociales? Analice los límites entre libertad de expresión y deber de secreto profesional.",
+ "Un registro electrónico completo pero copiado de turnos anteriores (copy-paste) puede ser más peligroso que un registro incompleto. Justifique."
+];
+const el=(t,c,txt)=>{const e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;return e;};
+const la=document.getElementById("listA");
+A.forEach(([tag,stem,opts,right,why],i)=>{
+  const box=el("article","q");box.append(el("span","tag",(i+1)+" · "+tag),el("p","stem",stem));
+  const ol=el("ol");opts.forEach((o,k)=>{const li=el("li",k===right?"right":"");li.append(el("span","l","abcd"[k]+")"),el("span","",o));ol.append(li);});
+  box.append(ol);const w=el("p","why");w.append(el("strong","","Respuesta "+"abcd"[right]+". "),why);box.append(w);la.append(box);
+});
+const lb=document.getElementById("listB");
+B.forEach(([t,ctx,qs],i)=>{
+  const box=el("article","q case");box.append(el("span","tag","Caso "+(i+1)),el("h3","",t),el("p","",ctx));
+  const ol=el("ol");qs.forEach(q=>ol.append(el("li","",q)));box.append(ol);lb.append(box);
+});
+const lc=document.getElementById("listC");C.forEach(q=>lc.append(el("li","",q)));
+const tg=document.getElementById("toggle");
+tg.addEventListener("click",()=>{const on=document.body.classList.toggle("show");tg.textContent=on?"Ocultar respuestas":"Mostrar respuestas";tg.setAttribute("aria-pressed",on);});
+})();
+</script>
+</body>
+</html>
