@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crucigrama · Desafío Enfermería Digital</title>
+<meta name="description" content="Crucigrama por grupos de la Unidad 3 de TIC aplicada en Enfermería.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body data-act="cruci">
+<div class="wrap play-page">
+  <header>
+    <div>
+      <div class="kicker">Desafío Enfermería Digital · Unidad 3</div>
+      <h1>Crucigrama</h1>
+    </div>
+  </header>
+
+  <section id="intro" class="play-card">
+    <p>Completen el crucigrama con conceptos de los Temas 3 y 4. Toquen una casilla para escribir; tóquenla otra vez para cambiar entre horizontal y vertical. También pueden tocar una pista para ir a su palabra. No lleva tildes. Las palabras correctas se ponen en verde.</p>
+    <p>Cuando completen las 10 palabras, la página les dará un <b>código</b>. Péguenlo en el chat de Meet: los primeros grupos en llegar ganan más puntos.</p>
+    <label for="groupName" class="lbl">Nombre del grupo</label>
+    <input id="groupName" class="name-in" placeholder="Ej.: Equipo 3" autocomplete="off" maxlength="40">
+    <p class="err" id="nameErr" hidden>Escriban el nombre del grupo para empezar.</p>
+    <button type="button" class="primary big" id="startBtn">Empezar</button>
+  </section>
+
+  <section id="play" hidden>
+    <div class="play-bar">
+      <span class="who" id="who"></span>
+      <span class="count" id="count"></span>
+      <span class="clock" id="clock">0:00</span>
+      <div class="progress"><div id="bar"></div></div>
+    </div>
+    <div class="done" id="done" hidden>
+      <h2>¡Terminaron!</h2>
+      <p>Copien este código y péguenlo en el chat de Meet:</p>
+      <div class="code" id="code"></div>
+      <button type="button" class="primary" id="copyBtn">Copiar código</button>
+    </div>
+    <div id="box" class="act-box"></div>
+  </section>
+</div>
+<script src="actividades.js"></script>
+<script src="jugar.js"></script>
+</body>
+</html>

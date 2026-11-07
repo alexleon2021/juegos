@@ -183,17 +183,17 @@ const CWD=buildCW();
 const ACTIVIDADES={
  sopa:{title:"Sopa de letras",time:300,
   intro:"Los equipos deducen cada palabra a partir de su pista y la buscan en la sopa (horizontal, vertical, diagonal o al revés). Cuando la digan bien, toque ✓ en la pista y la palabra se marca sola. También puede arrastrar sobre las letras.",
-  render(box){
-    const ws=buildWS(Math.floor(Math.random()*100000));
+  render(box,names,opts={}){
+    const ws=buildWS(opts.seed!=null?opts.seed:Math.floor(Math.random()*100000));
     const grid=h("div",{class:"wsgrid",style:"grid-template-columns:repeat("+SIZE+",1fr)","aria-label":"Sopa de letras"});
     ws.grid.forEach((ch,i)=>grid.append(h("div",{class:"cell","data-i":i,text:ch})));
     const ol=h("ol",{class:"clues"});let reveal=false;
     const cellsOf=w=>ws.place.find(p=>p.w===w).cells;
     function markWord(w,on){if(on){ws.found.add(w);cellsOf(w).forEach(i=>grid.children[i].classList.add("found"));}
       else{ws.found.delete(w);const keep=new Set();ws.found.forEach(x=>cellsOf(x).forEach(i=>keep.add(i)));cellsOf(w).forEach(i=>{if(!keep.has(i))grid.children[i].classList.remove("found");});}
-      drawClues();}
+      drawClues();if(opts.onChange)opts.onChange(ws.found.size,WORDS.length);}
     function drawClues(){ol.innerHTML="";WORDS.forEach(([w,clue],k)=>{const got=ws.found.has(w);
-      const mark=reveal?null:h("button",{type:"button",class:"mark"+(got?" undo":""),title:got?"Desmarcar":"La dijeron bien","aria-label":(got?"Desmarcar ":"Marcar como dicha: ")+"pista "+(k+1),text:got?"↺":"✓",onclick:()=>markWord(w,!got)});
+      const mark=(reveal||opts.student)?null:h("button",{type:"button",class:"mark"+(got?" undo":""),title:got?"Desmarcar":"La dijeron bien","aria-label":(got?"Desmarcar ":"Marcar como dicha: ")+"pista "+(k+1),text:got?"↺":"✓",onclick:()=>markWord(w,!got)});
       ol.append(h("li",{class:got?"ok":(reveal?"miss":null)},h("span",{class:"n",text:String(k+1).padStart(2,"0")}),h("div",{},h("div",{text:clue}),h("div",{class:"ans",text:got||reveal?w:"_ ".repeat(w.length).trim()+"  ("+w.length+")"})),mark));});}
     box.append(h("div",{class:"split"},grid,h("div",{class:"col"},ol)));
     let start=null,line=[];
@@ -218,7 +218,7 @@ const ACTIVIDADES={
 
  cruci:{title:"Crucigrama",time:300,
   intro:"Los equipos dicen la palabra de cada pista. Cuando la digan bien, toque ✓ en la pista y la palabra se escribe sola en el crucigrama. También puede escribirla tocando las casillas. No lleva tildes.",
-  render(box){
+  render(box,names,opts={}){
     const {placed,letters,rows,cols,K}=CWD;let dir=0,active=null;
     const inp=(r,c)=>box.querySelector("#cw-"+r+"-"+c);
     const owner=new Map();placed.forEach((p,i)=>{for(let k=0;k<p.w.length;k++){const key=K(p.r+p.d*k,p.c+(1-p.d)*k);if(!owner.has(key))owner.set(key,{});owner.get(key)[p.d]=i;}});
@@ -231,11 +231,11 @@ const ACTIVIDADES={
     for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
       const key=K(r,c);
       if(!letters.has(key)){grid.append(h("div",{class:"cwblank"}));continue;}
-      const i=h("input",{id:"cw-"+r+"-"+c,maxlength:"1",autocomplete:"off",autocapitalize:"characters",spellcheck:"false","aria-label":"Fila "+(r+1)+", columna "+(c+1)});
+      const i=h("input",{id:"cw-"+r+"-"+c,autocomplete:"off",autocapitalize:"characters",spellcheck:"false","aria-label":"Fila "+(r+1)+", columna "+(c+1)});
       const o=owner.get(key);
       i.addEventListener("focus",()=>{if(o[dir]===undefined)dir=o[0]!==undefined?0:1;active=o[dir];highlight();});
       i.addEventListener("mousedown",()=>{if(document.activeElement===i&&o[0]!==undefined&&o[1]!==undefined){dir=1-dir;active=o[dir];highlight();}});
-      i.addEventListener("input",()=>{const v=i.value.toUpperCase().replace(/[^A-ZÑ]/g,"");i.value=v.slice(-1);i.parentElement.classList.remove("ok","bad");if(v)move(r,c,1);});
+      i.addEventListener("input",()=>{const v=i.value.toUpperCase().replace(/[^A-ZÑ]/g,"");i.value=v.slice(-1);i.parentElement.classList.remove("ok","bad");if(v)move(r,c,1);progress();});
       i.addEventListener("keydown",e=>{
         if(e.key==="Backspace"&&!i.value){e.preventDefault();move(r,c,-1);}
         const ar={ArrowRight:[0,1,0],ArrowLeft:[0,-1,0],ArrowDown:[1,0,1],ArrowUp:[-1,0,1]}[e.key];
@@ -243,6 +243,12 @@ const ACTIVIDADES={
       grid.append(h("div",{class:"cwcell"},nums.has(key)?h("span",{class:"num",text:nums.get(key)}):null,i));
     }
     const said=new Set();
+    // modo estudiante: las palabras completas se pintan de verde y se avisa el avance
+    function progress(){if(!opts.student)return;let ok=0;
+      placed.forEach((p,i)=>{const done=cellsOf(p).every(([e,ch])=>e.value===ch);if(done)ok++;box.querySelector('.clues li[data-i="'+i+'"]').classList.toggle("ok",done);});
+      grid.querySelectorAll(".cwcell").forEach(x=>x.classList.remove("ok"));
+      placed.forEach(p=>{if(cellsOf(p).every(([e,ch])=>e.value===ch))cellsOf(p).forEach(([e])=>e.parentElement.classList.add("ok"));});
+      if(opts.onChange)opts.onChange(ok,placed.length);}
     const cellsOf=p=>p.w.split("").map((ch,k)=>[inp(p.r+p.d*k,p.c+(1-p.d)*k),ch]);
     function markWord(i,on){const p=placed[i];
       if(on){said.add(i);cellsOf(p).forEach(([e,ch])=>{e.value=ch;e.parentElement.classList.add("ok");});}
@@ -250,7 +256,7 @@ const ACTIVIDADES={
       const li=box.querySelector('.clues li[data-i="'+i+'"]'),b=li.querySelector(".mark");
       li.classList.toggle("ok",on);b.textContent=on?"↺":"✓";b.classList.toggle("undo",on);b.title=on?"Desmarcar":"La dijeron bien";}
     placed.forEach((p,i)=>{
-      const mark=h("button",{type:"button",class:"mark",title:"La dijeron bien","aria-label":"Marcar como dicha: pista "+p.n,text:"✓",onclick:e=>{e.stopPropagation();markWord(i,!said.has(i));}});
+      const mark=opts.student?null:h("button",{type:"button",class:"mark",title:"La dijeron bien","aria-label":"Marcar como dicha: pista "+p.n,text:"✓",onclick:e=>{e.stopPropagation();markWord(i,!said.has(i));}});
       const li=h("li",{"data-i":i},h("span",{class:"n",text:p.n}),h("div",{},h("div",{text:p.clue}),h("div",{class:"ans",text:p.w.length+" letras"})),mark);
       li.onclick=()=>{dir=p.d;inp(p.r,p.c).focus();active=i;highlight();};lists[p.d].append(li);});
     box.append(h("div",{class:"split"},grid,h("div",{class:"col"},h("h3",{text:"Horizontales"}),lists[0],h("h3",{text:"Verticales"}),lists[1])));
@@ -347,4 +353,14 @@ const ACTIVIDADES={
   }}
 };
 window.ACTIVIDADES=ACTIVIDADES;
+
+/* ---------- código de "terminado" para las actividades en el celular ---------- */
+// Formato: SOPA · Equipo 3 · 4:32 · K7Q   (las 3 últimas letras comprueban que el código es auténtico)
+const firma=t=>{let x=7;for(const ch of "UNEMI-ENF|"+t)x=(Math.imul(x,31)+ch.charCodeAt(0))>>>0;return (x%46656).toString(36).toUpperCase().padStart(3,"0");};
+const norm=n=>n.trim().replace(/\s+/g," ").toUpperCase();
+window.CODIGOS={
+  make(pref,name,time){return pref+" · "+name.trim().replace(/\s+/g," ")+" · "+time+" · "+firma(pref+"|"+norm(name)+"|"+time);},
+  check(text){const m=/(SOPA|CRUCI)\s*·\s*(.+?)\s*·\s*(\d+:\d\d)\s*·\s*([0-9A-Z]{3})/i.exec(text||"");
+    if(!m)return null;return {act:m[1].toUpperCase(),name:m[2],time:m[3],ok:firma(m[1].toUpperCase()+"|"+norm(m[2])+"|"+m[3])===m[4].toUpperCase()};}
+};
 })();

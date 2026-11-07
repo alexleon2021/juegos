@@ -77,6 +77,7 @@ function openQ(ci,vi){
     ex.appendChild(el("p",{class:"ctx"},A.intro));
     const box=el("div",{class:"act-box"}); ex.appendChild(box);
     cur.activity=A.render(box,state.names.slice(0,state.n));
+    if(q.act==="sopa"||q.act==="cruci") ex.insertBefore(buildRace(q.act,v),box);
     $("showBtn").textContent="Revisar y ver solución";
     setTimer(A.time);
   }else{
@@ -89,6 +90,58 @@ function openQ(ci,vi){
   }
   show();
 }
+/* ---------- competencia en los celulares: orden de llegada ---------- */
+function buildRace(act,base){
+  const url=new URL(act==="sopa"?"sopa.html":"crucigrama.html",location.href).href;
+  const panel=el("details",{class:"race"});
+  panel.appendChild(el("summary",null,"Jugar en los celulares de los grupos (por orden de llegada)"));
+  const body=el("div",{class:"race-body"}); panel.appendChild(body);
+
+  // 1. enlace
+  body.appendChild(el("p",{class:"step-t"},"1. Envíe este enlace por el chat de Meet:"));
+  const linkRow=el("div",{class:"row"});
+  const link=el("code",{class:"link"},url);
+  const copy=el("button",{type:"button"},"Copiar enlace");
+  copy.addEventListener("click",()=>{const done=()=>copy.textContent="Copiado ✓";
+    const sel=()=>{const r=document.createRange();r.selectNodeContents(link);const s=getSelection();s.removeAllRanges();s.addRange(r);copy.textContent="Selecciónelo y cópielo";};
+    try{navigator.clipboard.writeText(url).then(done,sel);}catch(e){sel();}});
+  linkRow.append(link,copy); body.appendChild(linkRow);
+
+  // 2. reglas de puntos
+  body.appendChild(el("p",{class:"step-t"},"2. Puntos según el orden de llegada:"));
+  const cfg=el("div",{class:"row"});
+  const nIn=el("input",{type:"number",min:"1",max:"25",value:"10",class:"num-in","aria-label":"Cuántos grupos ganan el puntaje completo"});
+  const stIn=el("input",{type:"number",min:"0",step:"10",value:"50",class:"num-in","aria-label":"Cuánto baja por cada puesto"});
+  cfg.append(el("span",null,"Los primeros"),nIn,el("span",null,"ganan "+base+"; después baja"),stIn,el("span",null,"por puesto (mínimo 50)."));
+  body.appendChild(cfg);
+  const pts=place=>{const n=+nIn.value||10,st=+stIn.value||0;return place<=n?base:Math.max(50,base-st*(place-n));};
+
+  // 3. orden de llegada
+  body.appendChild(el("p",{class:"step-t"},"3. Cuando un grupo pegue su código en el chat, tóquelo aquí en ese orden:"));
+  const btns=el("div",{class:"row race-teams"}); body.appendChild(btns);
+  const list=el("ol",{class:"race-list"}); body.appendChild(list);
+  const undo=el("button",{type:"button",class:"small-btn"},"Deshacer el último"); undo.disabled=true; body.appendChild(undo);
+  const order=[];
+  for(let i=0;i<state.n;i++){
+    const b=el("button",{type:"button",class:"award"},state.names[i]);
+    b.addEventListener("click",()=>{const place=order.length+1,p=pts(place);order.push({i,p,b});state.scores[i]+=p;save();renderScores();b.disabled=true;drawList();});
+    btns.appendChild(b);
+  }
+  function drawList(){list.innerHTML="";order.forEach((o,k)=>list.appendChild(el("li",null,state.names[o.i]+" · +"+o.p)));undo.disabled=!order.length;}
+  undo.addEventListener("click",()=>{const o=order.pop();if(!o)return;state.scores[o.i]-=o.p;save();renderScores();o.b.disabled=false;drawList();});
+
+  // 4. comprobar un código
+  body.appendChild(el("p",{class:"step-t"},"¿Duda de un código? Péguelo aquí para comprobarlo:"));
+  const vRow=el("div",{class:"row"});
+  const vIn=el("input",{type:"text",class:"code-in",placeholder:"SOPA · Equipo 3 · 4:32 · K7Q","aria-label":"Código a comprobar"});
+  const vOut=el("span",{class:"v-out"});
+  vIn.addEventListener("input",()=>{const r=window.CODIGOS.check(vIn.value);
+    vOut.className="v-out "+(r?(r.ok?"good":"bad"):"");
+    vOut.textContent=!vIn.value.trim()?"":!r?"No parece un código de la actividad.":r.ok?"Código válido: "+r.name+" terminó en "+r.time+".":"Código no válido: fue modificado.";});
+  vRow.append(vIn,vOut); body.appendChild(vRow);
+  return panel;
+}
+
 function openFinal(){
   cur={final:true,v:500,q:FINAL};
   document.querySelector("#overlay .card").classList.remove("wide");

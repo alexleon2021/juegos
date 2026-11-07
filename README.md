@@ -21,6 +21,7 @@ Es un solo tablero de 5 categorías y 6 filas (100 a 600 puntos), con 30 casilla
 | `preguntas.js` | Qué hay en cada casilla: preguntas y actividades (aquí se editan) |
 | `actividades.js` | Las actividades: sopa de letras, crucigrama, detecta el error, NANDA-NIC, ordena los pasos, ¿correcto o falta?, riesgo y medida y dilema |
 | `juego.js` | Funcionamiento del tablero y del marcador |
+| `sopa.html`, `crucigrama.html`, `jugar.js` | Páginas para que los grupos jueguen la sopa de letras o el crucigrama en su celular |
 | `estilos.css` | Colores y diseño |
 
 ## Publicar en GitHub y Vercel
@@ -45,3 +46,11 @@ Abra `preguntas.js` en GitHub, pulse el lápiz (**Edit**), cambie los textos ent
 - Pulse **Mostrar respuesta** (o **Revisar y ver solución** en las actividades) y asigne los puntos: valor completo si lo resolvieron bien, la mitad si fue un rebote o un resultado parcial.
 - La **Pregunta final** permite dar hasta 500 puntos a cada equipo.
 - **Reiniciar juego** borra los puntajes para otro grupo. El progreso se guarda en el navegador de la docente.
+
+## Sopa de letras y crucigrama en los celulares (por orden de llegada)
+
+1. Abra la casilla de la sopa de letras (Desinformación · 300) o del crucigrama (Desinformación · 500) y despliegue **Jugar en los celulares de los grupos**.
+2. Copie el enlace y envíelo por el chat de Meet (por ejemplo `su-enlace.vercel.app/sopa.html` o `su-enlace.vercel.app/crucigrama.html`).
+3. Cada grupo escribe su nombre, pulsa **Empezar** y resuelve la actividad. Al terminar, la página les da un código como `SOPA · Equipo 7 · 4:32 · K7Q` para pegar en el chat.
+4. En el orden en que lleguen los códigos al chat, toque el botón de cada grupo. La página suma los puntos sola: los primeros 10 ganan el valor completo y desde el puesto 11 se baja de 50 en 50 (mínimo 50). Ambos números se pueden cambiar.
+5. Si duda de un código, péguelo en **¿Duda de un código?**: la página dice si es auténtico o fue modificado.
