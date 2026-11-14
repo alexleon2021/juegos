@@ -54,3 +54,21 @@ Abra `preguntas.js` en GitHub, pulse el lápiz (**Edit**), cambie los textos ent
 3. Cada grupo escribe su nombre, pulsa **Empezar** y resuelve la actividad. Al terminar, la página les da un código como `SOPA · Equipo 7 · 4:32 · K7Q` para pegar en el chat.
 4. En el orden en que lleguen los códigos al chat, toque el botón de cada grupo. La página suma los puntos sola: los primeros 10 ganan el valor completo y desde el puesto 11 se baja de 50 en 50 (mínimo 50). Ambos números se pueden cambiar.
 5. Si duda de un código, péguelo en **¿Duda de un código?**: la página dice si es auténtico o fue modificado.
+
+## Ruta del Cuidado (`ruta.html`) · juego individual
+
+Juego para que cada estudiante juegue solo desde su celular o computadora. Un enfermero recorre el hospital estación por estación, de abajo hacia arriba, hasta la meta «Líder del Cuidado Digital». Cada unidad es un pabellón y termina con una evaluación que hay que aprobar para pasar al siguiente.
+
+- **Enlace para los estudiantes:** `su-enlace.vercel.app/ruta.html`
+- **Retos:** preguntas, casos clínicos, verdadero o falso, cálculos de estadística, código en RStudio, ordenar pasos, emparejar, clasificar, sopas de letras, crucigramas y detectar errores en una nota de enfermería.
+- **Duración estimada:** unas 2 horas con las Unidades 2 y 3 (60 estaciones).
+- **Al terminar,** el estudiante recibe un código como `RUTA · Nombre · 6250 pts · 112 min · AB12` para entregar a la docente.
+- **Verificar códigos:** abra `su-enlace.vercel.app/ruta.html#verificar` y pegue el código; la página dice si es auténtico.
+- El avance se guarda en el dispositivo del estudiante: si cierra la página, puede continuar.
+
+| Archivo | Para qué sirve |
+|---|---|
+| `ruta.html` | La página del juego |
+| `ruta-contenido.js` | Preguntas y actividades de cada pabellón (aquí se editan y se agregan unidades) |
+| `ruta.js` | Funcionamiento del juego |
+| `ruta.css` | Colores y diseño |

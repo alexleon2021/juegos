@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ruta del Cuidado</title>
+<meta name="description" content="Juego individual de TIC aplicada en Enfermería: un enfermero recorre el hospital superando retos hasta la meta.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="ruta.css">
+</head>
+<body>
+
+<!-- barra superior durante el juego -->
+<header class="hud" id="hud" hidden>
+  <div class="hud-in">
+    <span class="hud-name" id="hudName"></span>
+    <span class="hud-chip"><b id="hudPts">0</b> pts</span>
+    <span class="hud-chip rank" id="hudRank"></span>
+    <span class="hud-chip" title="Comodines: eliminan dos opciones incorrectas">Comodines: <b id="hudCom">3</b></span>
+    <span class="hud-chip time" id="hudTime">0 h 00 min</span>
+    <span class="hud-step">Estación <b id="hudStep">0 / 0</b></span>
+    <div class="hud-bar"><div id="hudBar"></div></div>
+  </div>
+</header>
+
+<!-- inicio -->
+<main class="screen intro" id="inicio" hidden>
+  <div class="intro-card">
+    <div class="kicker">TIC aplicada en Enfermería · Maestría en Enfermería</div>
+    <h1>Ruta del Cuidado</h1>
+    <p class="lead">Usted es un enfermero o enfermera que recorre el hospital, pabellón por pabellón, hasta convertirse en <b>Líder del Cuidado Digital</b>. En cada estación le espera un reto distinto: preguntas, casos clínicos, cálculos, código en RStudio, sopas de letras, crucigramas y más.</p>
+    <ul class="rules">
+      <li><b><span id="nEst">0</span> estaciones</b> en <span id="nUni">0</span> pabellones. Avanza una a la vez.</li>
+      <li>En las preguntas tiene <b>dos intentos</b>: el segundo vale la mitad.</li>
+      <li>Tiene <b>3 comodines</b> «Consultar a un colega» que eliminan dos opciones incorrectas.</li>
+      <li>Al final de cada pabellón hay una <b>evaluación</b>: si no la aprueba, la repite con otras preguntas.</li>
+      <li>Su avance se guarda en este dispositivo: si cierra la página, puede continuar después.</li>
+      <li>Al llegar a la meta recibirá un <b>código</b> con su puntaje y tiempo para entregarlo a su docente.</li>
+    </ul>
+    <div class="cont" id="cont" hidden>
+      <p>Tiene una partida guardada de <b id="contName"></b>: <b id="contPts">0</b> puntos, estación <b id="contIdx"></b>.</p>
+      <button type="button" class="primary big" id="contBtn">Continuar la partida</button>
+    </div>
+    <label for="playerName" class="lbl">Nombres y apellidos (como aparecen en la lista del curso)</label>
+    <input id="playerName" class="name-in" autocomplete="name" maxlength="60" placeholder="Ej.: María Fernanda López">
+    <p class="err" id="nameErr" hidden>Escriba al menos un nombre y un apellido.</p>
+    <div class="confirm" id="confirmNew" hidden>
+      <p>Empezar de nuevo borrará la partida guardada en este dispositivo. ¿Continuar?</p>
+      <div class="row"><button type="button" class="primary" id="newYes">Sí, empezar de nuevo</button><button type="button" id="newNo">Cancelar</button></div>
+    </div>
+    <button type="button" class="primary big" id="startBtn">Empezar el recorrido</button>
+  </div>
+</main>
+
+<!-- mapa -->
+<main class="screen" id="mapa" hidden>
+  <div class="map" id="map"></div>
+  <div class="go-bar"><button type="button" class="primary big" id="goBtn">Ir a la estación</button></div>
+</main>
+
+<!-- reto -->
+<div class="reto" id="reto" hidden role="dialog" aria-modal="true" aria-labelledby="rTitle">
+  <div class="reto-card">
+    <div class="reto-top">
+      <span class="tag" id="rTag"></span>
+      <span class="type" id="rType"></span>
+      <span class="max" id="rMax"></span>
+    </div>
+    <h2 id="rTitle"></h2>
+    <div class="reto-body" id="rBody"></div>
+    <div class="reto-foot" id="rFoot"></div>
+  </div>
+</div>
+
+<!-- final -->
+<main class="screen final" id="final" hidden>
+  <div class="cert">
+    <div class="kicker">Ruta del Cuidado · Certificado de recorrido</div>
+    <h1>¡Llegó a la meta!</h1>
+    <p class="cert-name" id="fName"></p>
+    <p class="cert-rank" id="fRank"></p>
+    <div class="cert-stats">
+      <div><span class="big-n" id="fPts">0</span><span>de <b id="fMax">0</b> puntos</span></div>
+      <div><span class="big-n" id="fPct">0 %</span><span>de aciertos</span></div>
+      <div><span class="big-n small" id="fTime"></span><span>de recorrido</span></div>
+    </div>
+    <table class="zones"><tbody id="fZones"></tbody></table>
+    <p>Copie este código y entréguelo a su docente (chat, aula virtual o correo):</p>
+    <div class="code" id="fCode"></div>
+    <div class="row center"><button type="button" class="primary" id="copyCode">Copiar código</button></div>
+    <p class="muted small">Fecha: <span id="fDate"></span></p>
+    <div class="row center"><button type="button" class="ghost" id="restartBtn">Jugar otra vez</button></div>
+    <div class="confirm" id="restartConfirm" hidden>
+      <p>Se borrará este resultado del dispositivo. Copie antes su código. ¿Continuar?</p>
+      <div class="row center"><button type="button" class="primary" id="restartYes">Sí, empezar de nuevo</button><button type="button" id="restartNo">Cancelar</button></div>
+    </div>
+  </div>
+</main>
+
+<!-- verificación para la docente -->
+<main class="screen intro" id="verificar" hidden>
+  <div class="intro-card">
+    <div class="kicker">Ruta del Cuidado · Para la docente</div>
+    <h1>Verificar un código</h1>
+    <p>Pegue el código que le envió el estudiante. La página comprueba que el nombre, el puntaje y el tiempo no fueron modificados.</p>
+    <input id="vIn" class="name-in" placeholder="RUTA · Nombre · 3250 pts · 104 min · AB12" aria-label="Código del estudiante">
+    <p class="v-out" id="vOut" aria-live="polite"></p>
+    <p><a href="ruta.html" class="link">Ir al juego</a></p>
+  </div>
+</main>
+
+<script src="ruta-contenido.js"></script>
+<script src="ruta.js"></script>
+</body>
+</html>
